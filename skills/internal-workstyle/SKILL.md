@@ -1,6 +1,6 @@
 ---
 name: internal-workstyle
-description: 하네스 훅의 안내에 따라 공통 작업 규칙과 활성화된 TASK 규칙을 읽는다.
+description: 세션 시작 훅이 지정한 필수 스킬이다. 요청 종류와 관계없이 첫 작업 전에 호출해 공통 작업 규칙과 활성화된 TASK 규칙을 읽는다.
 ---
 
 # 작업 규칙 적용
