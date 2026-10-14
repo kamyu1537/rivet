@@ -45,7 +45,7 @@ codex plugin add rivet@rivet
 codex plugin list --marketplace rivet
 ```
 
-새 세션의 `/hooks`에서 Rivet의 `SessionStart`와 `Stop`을 검토하고 신뢰합니다. 설치 목록에 보이는 것만으로 훅이 실행됐다고 판단하지 않습니다. [패키징 문서](https://developers.openai.com/plugins/build/plugins), [훅 문서](https://learn.chatgpt.com/docs/hooks)
+새 세션의 `/hooks`에서 Rivet의 `SessionStart`와 `Stop`을 검토하고 신뢰합니다. 설치 목록과 훅 실행 기록을 각각 확인하세요. [플러그인 패키징 문서](https://developers.openai.com/plugins/build/plugins), [훅 문서](https://learn.chatgpt.com/docs/hooks)
 
 ### Cursor
 
@@ -158,7 +158,11 @@ pnpm run test
 
 ## 업데이트
 
-마켓플레이스 업데이트 명령이나 로컬 clone 갱신으로 플러그인을 업데이트합니다. 공통 규칙은 다음 세션부터 적용됩니다. Gemini는 갱신한 저장소에서 새 출력 폴더에 전용 패키지를 만들어 설치합니다. OpenCode는 설정이 가리키는 로컬 저장소를 갱신하고 다시 시작합니다.
+마켓플레이스 업데이트 명령을 실행하거나 로컬 저장소를 갱신합니다. 공통 규칙은 다음 세션부터 적용됩니다.
+
+설치 스킬 이름이 `/rivet:agent-setup`에서 `/rivet:internal-agent-setup`으로 바뀌었습니다. 업데이트 후에는 새 이름으로 호출하세요. TASK를 켜거나 끄는 `/rivet:tasks-setup`은 그대로입니다.
+
+### Codex 업데이트
 
 Codex는 원격 마켓플레이스를 갱신한 뒤 플러그인을 설치합니다.
 
@@ -167,6 +171,12 @@ codex plugin marketplace upgrade rivet
 codex plugin add rivet@rivet
 ```
 
-1.3.1에서 로컬 전용 패키지로 설치했다면 `codex plugin marketplace remove rivet`으로 기존 등록을 해제하고 [Codex 설치](#codex) 명령으로 원격 마켓플레이스를 등록합니다. 1.3.2부터는 Codex용 패키지를 따로 만들지 않습니다.
+1.3.1에서 로컬 전용 패키지로 설치했다면 `codex plugin marketplace remove rivet`으로 기존 등록을 해제합니다. 그다음 [Codex 설치](#codex) 명령을 실행합니다. 1.3.2부터는 Codex용 패키지를 따로 만들지 않습니다.
 
-설치 스킬 이름이 `/rivet:agent-setup`에서 `/rivet:internal-agent-setup`으로 바뀌었습니다. 업데이트 후에는 새 이름으로 호출하세요. TASK를 켜거나 끄는 `/rivet:tasks-setup`은 그대로입니다.
+### Gemini CLI 업데이트
+
+갱신한 저장소에서 [Gemini CLI 설치](#gemini-cli) 순서에 따라 전용 패키지를 만들고 설치합니다. 출력 경로는 저장소 밖의 새 폴더로 지정하세요.
+
+### OpenCode 업데이트
+
+설정이 가리키는 로컬 저장소를 갱신하고 OpenCode를 다시 시작합니다.
