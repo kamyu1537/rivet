@@ -1,0 +1,5 @@
+{
+  "name": "rivet",
+  "owner": { "name": "kamyu1537" },
+  "plugins": [{ "name": "rivet", "source": "./" }]
+}

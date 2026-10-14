@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      { "command": "node \"${CURSOR_PLUGIN_ROOT}/hooks/session-start.mjs\" cursor", "timeout": 10 }
+    ],
+    "stop": [
+      { "command": "node \"${CURSOR_PLUGIN_ROOT}/hooks/stop.mjs\" cursor", "timeout": 10, "loop_limit": 2 }
+    ]
+  }
+}

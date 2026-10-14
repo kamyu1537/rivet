@@ -1,0 +1,14 @@
+{
+  "name": "rivet",
+  "version": "1.3.1",
+  "description": "개인 작업 규칙, 선택적 TASK 추적과 독립 리뷰",
+  "author": { "name": "kamyu1537" },
+  "repository": "https://github.com/kamyu1537/rivet",
+  "skills": "./skills/",
+  "hooks": "./hooks/codex.json",
+  "interface": {
+    "displayName": "Rivet",
+    "shortDescription": "개인 작업 규칙과 독립적인 변경 리뷰",
+    "category": "Developer Tools"
+  }
+}

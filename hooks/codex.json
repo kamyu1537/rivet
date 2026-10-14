@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.mjs\" codex",
+            "commandWindows": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.mjs\" codex",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/stop.mjs\" codex", "commandWindows": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/stop.mjs\" codex", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      { "type": "command", "bash": "node \"${PLUGIN_ROOT}/hooks/session-start.mjs\" copilot", "powershell": "node \"$env:PLUGIN_ROOT/hooks/session-start.mjs\" copilot", "timeoutSec": 10 }
+    ],
+    "agentStop": [
+      { "type": "command", "bash": "node \"${PLUGIN_ROOT}/hooks/stop.mjs\" copilot", "powershell": "node \"$env:PLUGIN_ROOT/hooks/stop.mjs\" copilot", "timeoutSec": 10 }
+    ]
+  }
+}

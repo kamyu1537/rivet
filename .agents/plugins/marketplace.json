@@ -1,0 +1,12 @@
+{
+  "name": "rivet",
+  "interface": { "displayName": "Rivet" },
+  "plugins": [
+    {
+      "name": "rivet",
+      "source": { "source": "local", "path": "./" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    }
+  ]
+}
