@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => JSON.parse(readFileSync(join(root, file), "utf8"));
 const pkg = readJson("package.json");
-for (const file of [".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json", "plugin.json"]) {
+assert.equal(existsSync(join(root, "plugin.json")), false, "A root plugin.json overrides the Codex manifest and disables its hooks");
+for (const file of [".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json", ".plugin/plugin.json"]) {
   const manifest = readJson(file);
   assert.equal(manifest.name, pkg.name);
   assert.equal(manifest.version, pkg.version);
@@ -27,8 +28,9 @@ for (const file of [".claude-plugin/marketplace.json", ".cursor-plugin/marketpla
   assert.equal(typeof source === "string" ? source : source.path, "./");
 }
 for (const extension of pkg.omp.extensions) assert.ok(existsSync(join(root, extension)));
-assert.equal(readJson("plugin.json").$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
-assert.equal(readJson("com.github.copilot/hooks/hooks.json").version, 1);
+const copilot = readJson(".plugin/plugin.json");
+assert.equal(copilot.$schema, undefined, "Copilot uses the legacy manifest with explicit skills and hooks");
+assert.equal(readJson(copilot.hooks).version, 1);
 for (const event of ["SessionStart", "AfterAgent"]) assert.ok(readJson("hooks/gemini.json").hooks[event]?.length);
 assert.ok(existsSync(join(root, "hooks/opencode.mjs")));
 assert.ok(existsSync(join(root, "scripts/package-gemini.mjs")));

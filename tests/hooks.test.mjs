@@ -152,6 +152,23 @@ test("Gemini packaging keeps local references and executes the shipped hooks out
   assert.equal(existsSync(nested), false);
 });
 
+test("Gemini packaging rejects an output inside the source given through its Windows 8.3 short path", { skip: process.platform !== "win32" && "Windows only" }, async (t) => {
+  const temp = mkdtempSync(join(tmpdir(), "rivet-gemini-short-"));
+  t.after(() => rmSync(temp, { recursive: true, force: true }));
+  const source = join(temp, "long source directory");
+  await cp(join(root, "scripts"), join(source, "scripts"), { recursive: true });
+  const command = "$ErrorActionPreference = 'Stop'; [Console]::OutputEncoding = [Text.Encoding]::UTF8; (New-Object -ComObject Scripting.FileSystemObject).GetFolder($env:PACKAGE_SOURCE_PATH).ShortPath";
+  const shortPath = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", command], { env: { ...process.env, PACKAGE_SOURCE_PATH: source }, encoding: "utf8" });
+  assert.equal(shortPath.status, 0, shortPath.stderr);
+  const short = shortPath.stdout.trim();
+  if (short.toLowerCase() === source.toLowerCase()) return t.skip("8.3 short name generation is disabled for this volume");
+  const output = join(short, "package-output");
+  const built = spawnSync(process.execPath, [join(source, "scripts/package-gemini.mjs"), output], { encoding: "utf8" });
+  assert.equal(built.status, 1);
+  assert.match(built.stderr, /outside the source directory/);
+  assert.equal(existsSync(output), false);
+});
+
 test("OMP queues hidden context on startup, switching and compaction using the host context", async (t) => {
   const temp = mkdtempSync(join(tmpdir(), "rivet-omp-"));
   t.after(() => rmSync(temp, { recursive: true, force: true }));
@@ -175,16 +192,13 @@ test("OMP queues hidden context on startup, switching and compaction using the h
   }
 });
 
-test("Copilot plugin uses its namespaced hooks and the host-provided plugin root on each shell", async (t) => {
+test("Copilot plugin uses its declared hooks and the host-provided plugin root on each shell", async (t) => {
   const temp = mkdtempSync(join(tmpdir(), "rivet copilot 한글 "));
   t.after(() => rmSync(temp, { recursive: true, force: true }));
   const plugin = join(temp, "plugin copy");
-  for (const directory of ["com.github.copilot", "hooks", "scripts", "prompts", "skills"]) await cp(join(root, directory), join(plugin, directory), { recursive: true });
-  const manifest = JSON.parse(readFileSync(join(root, "plugin.json"), "utf8"));
-  assert.equal(manifest.$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
-  assert.equal(manifest.hooks, undefined);
-  assert.equal(manifest.skills, undefined);
-  const config = JSON.parse(readFileSync(join(plugin, "com.github.copilot/hooks/hooks.json"), "utf8"));
+  for (const directory of [".plugin", "com.github.copilot", "hooks", "scripts", "prompts", "skills"]) await cp(join(root, directory), join(plugin, directory), { recursive: true });
+  const manifest = JSON.parse(readFileSync(join(plugin, ".plugin/plugin.json"), "utf8"));
+  const config = JSON.parse(readFileSync(resolve(plugin, manifest.hooks), "utf8"));
   assert.equal(config.version, 1);
   assert.deepEqual(Object.keys(config.hooks), ["sessionStart", "agentStop"]);
   const home = join(temp, "home");
@@ -204,7 +218,7 @@ test("Copilot plugin uses its namespaced hooks and the host-provided plugin root
   const disabled = fire("sessionStart", event).additionalContext;
   assert.match(disabled, /TASK enabled: false/);
   const skillPath = JSON.parse(disabled.match(/^Workstyle skill: (.+)$/m)[1]);
-  assert.equal(resolve(skillPath), join(plugin, "skills/internal-workstyle/SKILL.md"));
+  assert.equal(resolve(skillPath), resolve(plugin, manifest.skills, "internal-workstyle/SKILL.md"));
   assert.ok(readFileSync(skillPath, "utf8").trim());
   assert.equal(cli(["enable"]).status, 0);
   const context = fire("sessionStart", event).additionalContext;

@@ -37,16 +37,15 @@ claude plugin list
 
 ### Codex
 
-Codex 0.162.1의 훅 호환성을 위해 로컬 저장소에서 전용 패키지를 만들어 설치합니다. 저장소를 받은 뒤 루트에서 실행하세요.
+원격 마켓플레이스에서 설치합니다.
 
 ```sh
-node scripts/package-codex.mjs ../rivet-codex
-codex plugin marketplace add ../rivet-codex
+codex plugin marketplace add kamyu1537/rivet
 codex plugin add rivet@rivet
 codex plugin list --marketplace rivet
 ```
 
-기존 `rivet` 마켓플레이스가 다른 경로를 가리키면 `codex plugin marketplace remove rivet`으로 등록을 해제한 뒤 새 패키지 경로를 추가합니다. 새 세션의 `/hooks`에서 Rivet의 `SessionStart`와 `Stop`을 검토하고 신뢰합니다. 설치 목록에 보이는 것만으로 훅이 실행됐다고 판단하지 않습니다. [패키징 문서](https://developers.openai.com/plugins/build/plugins), [훅 문서](https://learn.chatgpt.com/docs/hooks)
+새 세션의 `/hooks`에서 Rivet의 `SessionStart`와 `Stop`을 검토하고 신뢰합니다. 설치 목록에 보이는 것만으로 훅이 실행됐다고 판단하지 않습니다. [패키징 문서](https://developers.openai.com/plugins/build/plugins), [훅 문서](https://learn.chatgpt.com/docs/hooks)
 
 ### Cursor
 
@@ -159,17 +158,15 @@ pnpm run test
 
 ## 업데이트
 
-`codex plugin marketplace add kamyu1537/rivet`으로 원격 저장소를 마켓플레이스로 설치했다면 Rivet 훅이 실행되지 않을 수 있습니다. 아래 Codex 업데이트 순서로 로컬 패키지를 만들어 다시 설치하세요.
+마켓플레이스 업데이트 명령이나 로컬 clone 갱신으로 플러그인을 업데이트합니다. 공통 규칙은 다음 세션부터 적용됩니다. Gemini는 갱신한 저장소에서 새 출력 폴더에 전용 패키지를 만들어 설치합니다. OpenCode는 설정이 가리키는 로컬 저장소를 갱신하고 다시 시작합니다.
 
-마켓플레이스 업데이트 명령이나 로컬 clone 갱신으로 플러그인을 업데이트합니다. 공통 규칙은 다음 세션부터 적용됩니다. Codex와 Gemini는 갱신한 저장소에서 새 출력 폴더에 전용 패키지를 만듭니다. Codex는 마켓플레이스 경로를 새 패키지로 바꿔 설치하고, Gemini는 새 확장을 설치합니다. OpenCode는 설정이 가리키는 로컬 저장소를 갱신하고 다시 시작합니다.
-
-Codex 업데이트는 저장소 루트에서 아래 순서로 실행합니다. `../rivet-codex-next`는 아직 존재하지 않는 출력 경로로 바꾸세요.
+Codex는 원격 마켓플레이스를 갱신한 뒤 플러그인을 설치합니다.
 
 ```sh
-node scripts/package-codex.mjs ../rivet-codex-next
-codex plugin marketplace remove rivet
-codex plugin marketplace add ../rivet-codex-next
+codex plugin marketplace upgrade rivet
 codex plugin add rivet@rivet
 ```
+
+1.3.1에서 로컬 전용 패키지로 설치했다면 `codex plugin marketplace remove rivet`으로 기존 등록을 해제하고 [Codex 설치](#codex) 명령으로 원격 마켓플레이스를 등록합니다. 1.3.2부터는 Codex용 패키지를 따로 만들지 않습니다.
 
 설치 스킬 이름이 `/rivet:agent-setup`에서 `/rivet:internal-agent-setup`으로 바뀌었습니다. 업데이트 후에는 새 이름으로 호출하세요. TASK를 켜거나 끄는 `/rivet:tasks-setup`은 그대로입니다.
