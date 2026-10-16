@@ -10,7 +10,7 @@
 - TASK를 켜면 작업 계획, 진행 상태와 검증 근거를 기록합니다. 등록된 미완료 항목이 있으면 계획당 최대 2회 계속 실행을 요청합니다.
 - `cross-review`는 일반 교차 리뷰, `adversarial-cross-review`는 가정과 실패 경로까지 검토하는 공격적 교차 리뷰를 실행합니다. 두 스킬 모두 독립된 에이전트에게 읽기 전용으로 검토를 요청합니다.
 
-`internal-agent-setup`은 설치와 초기 설정을, `tasks-setup`은 TASK 켜기와 끄기를 담당합니다. `internal-` 접두사가 붙은 스킬은 주로 훅, 설치 절차와 다른 스킬이 호출합니다. 스킬 호출 도구가 없으면 해당 스킬 파일을 직접 읽고 따릅니다.
+`rivet-setup`은 설치와 초기 설정을, `tasks-setup`은 TASK 켜기와 끄기를 담당합니다. `internal-` 접두사가 붙은 스킬은 주로 훅, 설치 절차와 다른 스킬이 호출합니다. 스킬 호출 도구가 없으면 해당 스킬 파일을 직접 읽고 따릅니다.
 
 ## 에이전트에게 설치 요청
 
@@ -33,7 +33,7 @@ claude plugin install rivet@rivet
 claude plugin list
 ```
 
-설치 과정에서 `/rivet:internal-agent-setup`으로 TASK 사용 여부를 선택합니다. 나중에는 `/rivet:tasks-setup`을 호출합니다. [공식 마켓플레이스 문서](https://code.claude.com/docs/en/plugin-marketplaces)
+마켓플레이스로 설치한 뒤 새 세션에서 `/rivet:rivet-setup`을 호출해 TASK 사용 여부를 선택합니다. 나중에는 `/rivet:tasks-setup`을 호출합니다. [공식 마켓플레이스 문서](https://code.claude.com/docs/en/plugin-marketplaces)
 
 ### Codex
 
@@ -132,10 +132,12 @@ TASK 설정은 지원하는 도구 모두에 함께 적용됩니다. 설정을 �
 
 ## 교차 리뷰
 
-| 요청 | 동작 |
+| 호출 | 동작 |
 | --- | --- |
-| "cross-review로 일반 리뷰해줘" | 변경 범위의 버그, 회귀, 요구사항과 검증 공백 확인 |
-| "adversarial-cross-review로 리뷰해줘" | 관련 호출 경로와 설계 가정을 따라 반례, 실패·복구, 보안·데이터·동시성 검토 |
+| `/rivet:cross-review` | 변경 범위의 버그, 회귀, 요구사항과 검증 공백 확인 |
+| `/rivet:adversarial-cross-review` | 관련 호출 경로와 설계 가정을 따라 반례, 실패·복구, 보안·데이터·동시성 검토 |
+
+두 스킬은 사용자가 직접 호출할 때만 실행합니다. 리뷰를 요청하는 것만으로는 실행하지 않습니다. 호출 형식은 하네스마다 다릅니다. Codex는 `$cross-review`, Cursor와 OpenCode는 `/cross-review`처럼 호출합니다. Claude Code, Codex, Cursor, OpenCode는 자동 선택을 설정으로 막습니다. GitHub Copilot CLI, Gemini CLI, OMP는 이런 설정이 없어 스킬 설명으로만 제한합니다.
 
 스킬은 현재 세션에서 쓸 수 있는 독립 에이전트나 CLI를 찾아 읽기 전용으로 리뷰합니다. 기존 인증과 구독 또는 API 연결을 사용하며, 사용할 수 없는 도구는 설치하지 않습니다. 두 모드 모두 리뷰어가 코드를 직접 수정하지 않습니다.
 
@@ -160,7 +162,7 @@ pnpm run test
 
 마켓플레이스 업데이트 명령을 실행하거나 로컬 저장소를 갱신합니다. 공통 규칙은 다음 세션부터 적용됩니다.
 
-설치 스킬 이름이 `/rivet:agent-setup`에서 `/rivet:internal-agent-setup`으로 바뀌었습니다. 업데이트 후에는 새 이름으로 호출하세요. TASK를 켜거나 끄는 `/rivet:tasks-setup`은 그대로입니다.
+설치 스킬 이름이 `/rivet:internal-agent-setup`에서 `/rivet:rivet-setup`으로 바뀌었습니다. 업데이트 후에는 새 이름으로 호출하세요. TASK를 켜거나 끄는 `/rivet:tasks-setup`은 그대로입니다.
 
 ### Codex 업데이트
 

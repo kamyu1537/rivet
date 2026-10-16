@@ -1,6 +1,10 @@
 ---
 name: adversarial-cross-review
-description: 변경사항을 독립 에이전트로 읽기 전용 공격적 교차 리뷰한다. 공격적 리뷰, 적대적 검토, adversarial review 또는 stress review를 요청할 때 사용한다.
+description: 사용자가 adversarial-cross-review를 명시적으로 호출했을 때만 변경사항을 독립 에이전트로 읽기 전용 공격적 교차 리뷰한다. 공격적 리뷰나 적대적 검토 요청만으로는 사용하지 않는다.
+disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: "false"
+  opencode/slash: "true"
 ---
 
 # 공격적 교차 리뷰

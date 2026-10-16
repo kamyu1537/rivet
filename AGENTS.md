@@ -2,7 +2,7 @@
 
 ## 설치 요청
 
-- 사용자가 이 플러그인 설치를 요청하면 [internal-agent-setup](skills/internal-agent-setup/SKILL.md)을 따른다.
+- 사용자가 이 플러그인 설치를 요청하면 [rivet-setup](skills/rivet-setup/SKILL.md)을 따른다.
 - TASK 활성화 여부를 확인한다. 이미 지정한 선택은 다시 묻지 않는다. 외부 플러그인 설치는 요청하거나 실행하지 않는다.
 - 공통 규칙은 플러그인 훅으로 전달한다. 전역 CLAUDE.md나 AGENTS.md에 복사하지 않는다.
 

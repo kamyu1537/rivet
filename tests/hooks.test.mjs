@@ -101,7 +101,7 @@ test("Gemini packaging keeps local references and executes the shipped hooks out
   assert.equal(manifest.name, "rivet");
   assert.equal(manifest.version, JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version);
   assert.equal(existsSync(join(root, "gemini-extension.json")), false);
-  assert.deepEqual(readdirSync(join(output, "skills")).sort(), ["adversarial-cross-review", "cross-review", "internal-agent-setup", "internal-cross-review", "internal-workstyle", "tasks-setup"]);
+  assert.deepEqual(readdirSync(join(output, "skills")).sort(), ["adversarial-cross-review", "cross-review", "internal-cross-review", "internal-workstyle", "rivet-setup", "tasks-setup"]);
   const checkLinks = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const file = join(directory, entry.name);

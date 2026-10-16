@@ -22,7 +22,7 @@ test("Codex marketplace source ships working hooks and skill dependencies withou
   const manifest = JSON.parse(readFileSync(join(plugin, ".codex-plugin/plugin.json"), "utf8"));
   assert.equal(manifest.name, marketplace.plugins[0].name);
   assert.equal(manifest.version, JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version);
-  assert.deepEqual(readdirSync(resolve(plugin, manifest.skills)).sort(), ["adversarial-cross-review", "cross-review", "internal-agent-setup", "internal-cross-review", "internal-workstyle", "tasks-setup"]);
+  assert.deepEqual(readdirSync(resolve(plugin, manifest.skills)).sort(), ["adversarial-cross-review", "cross-review", "internal-cross-review", "internal-workstyle", "rivet-setup", "tasks-setup"]);
   const checkLinks = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const file = join(directory, entry.name);

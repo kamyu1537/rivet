@@ -44,3 +44,12 @@ test("standalone review skills resolve their local dependencies without the plug
   };
   for (const name of names) inspect(join(installed, name));
 });
+
+test("review skills run only when the user invokes them", () => {
+  for (const name of ["adversarial-cross-review", "cross-review", "internal-cross-review"]) {
+    const frontmatter = readFileSync(join(root, "skills", name, "SKILL.md"), "utf8").match(/^---\r?\n([\s\S]*?)\r?\n---/)[1];
+    assert.match(frontmatter, /^disable-model-invocation: true$/m, `${name}: Claude Code and Cursor may invoke it implicitly`);
+    assert.match(frontmatter, /^  opencode\/autoinvoke: "false"$/m, `${name}: OpenCode may invoke it implicitly`);
+    assert.match(readFileSync(join(root, "skills", name, "agents/openai.yaml"), "utf8"), /^policy:\r?\n  allow_implicit_invocation: false$/m, `${name}: Codex may invoke it implicitly`);
+  }
+});

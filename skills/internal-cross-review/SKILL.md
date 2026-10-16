@@ -1,6 +1,9 @@
 ---
 name: internal-cross-review
-description: cross-review와 adversarial-cross-review가 선택한 모드로 독립 리뷰어를 실행하고 결과를 대조하는 내부 절차.
+description: cross-review와 adversarial-cross-review가 읽는 내부 절차다. 사용자가 직접 호출했을 때만 사용하고, 리뷰 요청만으로는 사용하지 않는다.
+disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: "false"
 ---
 
 # 교차 리뷰
