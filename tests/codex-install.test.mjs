@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync } from "node:fs";
 import { cp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
@@ -10,7 +10,7 @@ import { test } from "node:test";
 const root = fileURLToPath(new URL("../", import.meta.url));
 
 test("Codex marketplace source ships working hooks and skill dependencies without packaging", async (t) => {
-  const temp = mkdtempSync(join(tmpdir(), "rivet codex 한글 "));
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "rivet codex 한글 ")));
   t.after(() => rmSync(temp, { recursive: true, force: true }));
   const repository = join(temp, "repository copy");
   await cp(root, repository, { recursive: true, filter: (source) => ![".git", "node_modules", ".serena", ".audit"].includes(basename(source)) });

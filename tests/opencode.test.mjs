@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { cp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -9,7 +9,7 @@ import { test } from "node:test";
 const root = fileURLToPath(new URL("../", import.meta.url));
 
 async function fixture(t, enabled = true, flagFailure = false) {
-  const temp = mkdtempSync(join(tmpdir(), "rivet-opencode 한글 "));
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "rivet-opencode 한글 ")));
   t.after(() => rmSync(temp, { recursive: true, force: true }));
   const plugin = join(temp, "plugin copy");
   const cwd = join(temp, "workspace");

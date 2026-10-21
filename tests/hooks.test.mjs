@@ -10,7 +10,7 @@ import { test } from "node:test";
 const root = fileURLToPath(new URL("../", import.meta.url));
 
 test("installed hooks route to an internal skill within the startup budget and obey the TASK flag", async (t) => {
-  const temp = mkdtempSync(join(tmpdir(), "rivet 한글 "));
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "rivet 한글 ")));
   t.after(() => rmSync(temp, { recursive: true, force: true }));
   const plugin = join(temp, "long plugin directory ".repeat(3).trim(), "installed plugins", "plugin copy");
   const workspace = join(temp, process.platform === "win32" ? "workspace copy" : "workspace copy\\source");
@@ -91,7 +91,7 @@ test("installed hooks route to an internal skill within the startup budget and o
 });
 
 test("Gemini packaging keeps local references and executes the shipped hooks outside the source tree", (t) => {
-  const temp = mkdtempSync(join(tmpdir(), "rivet gemini 한글 "));
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "rivet gemini 한글 ")));
   t.after(() => rmSync(temp, { recursive: true, force: true }));
   const output = join(temp, "extension copy");
   const pack = (target) => spawnSync(process.execPath, [join(root, "scripts/package-gemini.mjs"), target], { encoding: "utf8" });
@@ -193,7 +193,7 @@ test("OMP queues hidden context on startup, switching and compaction using the h
 });
 
 test("Copilot plugin uses its declared hooks and the host-provided plugin root on each shell", async (t) => {
-  const temp = mkdtempSync(join(tmpdir(), "rivet copilot 한글 "));
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "rivet copilot 한글 ")));
   t.after(() => rmSync(temp, { recursive: true, force: true }));
   const plugin = join(temp, "plugin copy");
   for (const directory of [".plugin", "com.github.copilot", "hooks", "scripts", "prompts", "skills"]) await cp(join(root, directory), join(plugin, directory), { recursive: true });
