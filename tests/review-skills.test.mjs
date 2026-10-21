@@ -45,6 +45,18 @@ test("standalone review skills resolve their local dependencies without the plug
   for (const name of names) inspect(join(installed, name));
 });
 
+test("cross review selects installed reviewers at runtime and pins no model", () => {
+  const skill = readFileSync(join(root, "skills/internal-cross-review/SKILL.md"), "utf8");
+  assert.doesNotMatch(skill, /\b(gpt-?\d|o\d-?(mini|pro)|claude-(opus|sonnet|haiku)-\d|grok-\d|composer-\d)\b|--model\b/i, "a model ID or --model is pinned");
+  for (const cli of ["codex", "grok", "cursor-agent", "claude"]) assert.match(skill, new RegExp(`\`command -v ${cli}\``), `${cli}: not detected with command -v`);
+  assert.match(skill, /`codex exec`/);
+  assert.match(skill, /GPT·ChatGPT 계열 리뷰는 이 경로로만/);
+  assert.match(skill, /`agent` 실행 파일은[^\n]*Cursor로 취급하지 않는다/);
+  assert.match(skill, /Grok 또는 Composer 계열 모델만 사용한다[^\n]*Codex·GPT·Claude 모델이 보여도[^\n]*선택하지 않는다/);
+  assert.match(skill, /호스트가 Claude Code가 아닐 때만/);
+  assert.match(skill, /리뷰어가 하나도 없으면 교차 리뷰를 건너뛰고/);
+});
+
 test("review skills run only when the user invokes them", () => {
   for (const name of ["adversarial-cross-review", "cross-review", "internal-cross-review"]) {
     const frontmatter = readFileSync(join(root, "skills", name, "SKILL.md"), "utf8").match(/^---\r?\n([\s\S]*?)\r?\n---/)[1];
