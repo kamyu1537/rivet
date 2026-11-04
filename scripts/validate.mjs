@@ -53,4 +53,44 @@ function checkFiles(directory) {
   }
 }
 checkFiles(root);
-process.stdout.write("Manifests, skill metadata, extension paths, and local links are valid.\n");
+
+const forbidden = [
+  { id: "gemini", pattern: /gemini/i },
+  { id: "opencode", pattern: /opencode/i },
+  { id: "copilot", pattern: /copilot/i },
+  { id: "cross-review", pattern: /cross-review/i },
+  { id: "internal-workstyle", pattern: /internal-workstyle/i },
+  { id: "internal-cross-review", pattern: /internal-cross-review/i },
+  { id: "CodeGraph", pattern: /codegraph/i },
+];
+
+function checkForbidden(directory) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if ([".git", "node_modules"].includes(entry.name)) continue;
+    const file = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      checkForbidden(file);
+      continue;
+    }
+    if (!/\.(md|mdc|mjs|json)$/.test(file)) continue;
+    const relativeFile = relative(root, file).replaceAll("\\", "/");
+    if (relativeFile === "scripts/validate.mjs") continue;
+    for (const [index, line] of readFileSync(file, "utf8").split(/\r?\n/).entries()) {
+      for (const rule of forbidden) {
+        if (!rule.pattern.test(line)) continue;
+        assert.fail(`${relativeFile}:${index + 1}: forbidden surface "${rule.id}"`);
+      }
+    }
+  }
+}
+checkForbidden(root);
+
+const situationalOnly = ["workstyle-access", "workstyle-pnpm", "workstyle-root-cause", "workstyle-test-surface"];
+const skillNames = readdirSync(join(root, "skills"), { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
+assert.deepEqual(
+  skillNames.filter((name) => name.startsWith("workstyle-")),
+  situationalOnly,
+  "workstyle-* skills must stay situational-only; always-on rules belong in prompts/workstyle.md",
+);
+
+process.stdout.write("Manifests, skill metadata, extension paths, local links, and forbidden surfaces are valid.\n");

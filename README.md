@@ -62,7 +62,7 @@ Windows PowerShell:
 git clone https://github.com/kamyu1537/rivet.git "$env:USERPROFILE/.cursor/plugins/local/rivet"
 ```
 
-Cursor에서 창을 다시 불러온 뒤 Customize에서 플러그인, 스킬, Hooks를 확인합니다. 첫 요청에는 규칙이 아직 적용되지 않을 수 있습니다. 첫 요청부터 필요하면 [공통 작업 규칙](prompts/workstyle.md)을 읽도록 요청하세요. [공식 로컬 설치 문서](https://cursor.com/docs/plugins#test-plugins-locally), [Cursor 훅 문서](https://cursor.com/docs/hooks)
+Cursor에서 창을 다시 불러온 뒤 Customize에서 플러그인, 스킬, Hooks를 확인합니다. 첫 요청에는 규칙이 아직 적용되지 않을 수 있습니다. 첫 요청부터 필요하면 [공통 작업 규칙](prompts/workstyle.md)을 읽도록 요청하세요. GitHub 마켓플레이스로 설치한 경우에는 Update/Reinstall이 예전 커밋에 고정될 수 있으니, 위 로컬 폴더 설치를 쓴다. [공식 로컬 설치 문서](https://cursor.com/docs/plugins#test-plugins-locally), [Cursor 훅 문서](https://cursor.com/docs/hooks)
 
 Cursor Agent CLI `2026.10.01-e373342`에서는 스킬 읽기와 TASK 등록·완료가 동작합니다. 이 버전은 `--print` 실행에서 Stop 훅을 호출하지 않습니다. 대화형 실행도 사용자·프로젝트 Stop 훅 없이 플러그인 Stop 훅만 있으면 자동으로 계속 실행하지 않습니다. 이때는 완료 전에 [TASK 규칙](prompts/tasks.md)에 따라 `show`와 `check`로 상태를 확인합니다.
 
@@ -122,9 +122,9 @@ pnpm run test
 
 ## 업데이트
 
-마켓플레이스 업데이트 명령을 실행하거나 로컬 저장소를 갱신합니다. 공통 규칙은 다음 세션부터 적용됩니다.
+Claude Code, Codex, OMP는 각 마켓플레이스 업데이트 명령을 쓴다. Cursor는 `~/.cursor/plugins/local/rivet`에서 `git pull`한 뒤 창을 다시 불러온다. 공통 규칙은 다음 세션부터 적용된다.
 
-설치 스킬은 `/rivet:rivet-setup`입니다. TASK는 `/rivet:tasks-setup`으로 켜고 끕니다. 2.0.0부터 TASK는 프로젝트의 `CLAUDE.md` 또는 `AGENTS.md` 블록으로만 켜집니다. `~/.config/rivet/tasks-enabled`는 무시되며 삭제되지 않습니다.
+설치 스킬은 `/rivet:rivet-setup`이다. TASK는 `/rivet:tasks-setup`으로 켜고 끈다. 2.0.0부터 TASK는 프로젝트의 `CLAUDE.md` 또는 `AGENTS.md` 블록으로만 켜진다. `~/.config/rivet/tasks-enabled`는 무시되며 삭제되지 않는다.
 
 ### Codex 업데이트
 
