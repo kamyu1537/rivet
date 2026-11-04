@@ -2,12 +2,12 @@
 
 ## 로컬 설치
 
-1. [README의 Cursor 설치](../README.md#cursor)를 따른다. 활성 설치는 `~/.cursor/plugins/local/rivet`이다.
+1. [README의 Cursor 설치](../README.md#cursor)를 따른다. 개발·검증용 체크아웃은 `~/.cursor/plugins/local/rivet`이다.
 2. Cursor를 다시 불러오고 플러그인과 스킬이 발견되는지 확인한다.
 3. `sessionStart` 훅의 안내에 따라 `workstyle` 스킬이 공통 작업 규칙을 읽는지 확인한다. TASK는 [TASK 설정](tasks-setup.md)을 따른다. 블록은 프로젝트의 `CLAUDE.md` 또는 `AGENTS.md`에만 두고, workstyle 본문은 복사하지 않는다.
 4. Cursor와 다른 플러그인의 모델 설정을 새로 만들거나 덮어쓰지 않는다.
 
-GitHub URL로 넣은 Cursor 마켓플레이스 설치는 처음 받은 커밋에 고정될 수 있다. Settings의 Update/Reinstall이 그 스냅샷을 다시 깔 뿐이면, 마켓 설치를 끄고 로컬 폴더 설치로 바꾼 뒤 `git pull`한다. 같은 이름이면 마켓 설치가 로컬보다 우선한다.
+GitHub 마켓플레이스 미러는 `~/.cursor/plugins/marketplaces/github.com/<owner>/<repo>`이다. Cursor가 실제로 로드하는 트리는 `~/.cursor/plugins/cache/<owner>-<plugin>/<commit>/`이다. Settings의 Update/Reinstall은 그 고정 스냅샷을 다시 깔 수 있고 GitHub를 새로 받지 않을 수 있다. 같은 이름이면 마켓 설치가 로컬보다 우선한다. `local/rivet`에서 바깥 경로로 만든 심볼릭 링크는 무시될 수 있다. 마켓 설치가 고정되면 마켓을 끄고 로컬 폴더 설치로 바꾼 뒤 `git pull`한다.
 
 ## 선택 규칙
 

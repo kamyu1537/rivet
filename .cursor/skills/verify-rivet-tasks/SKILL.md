@@ -71,6 +71,13 @@ Follow `/maintain-formal-verification-skill`. Update the model from the code, re
 
 ## Not covered
 
+- Crash between strip and write inside `enableProjectTasks` (modeled as one step)
+- Whitespace-only files becoming `absent` after strip versus staying `none`
+- Concurrent enable/disable without the scope lock
+- Git worktree toplevel versus a non-git directory root
+- Rejected CLI calls (`unknown --file`, bare enable while disabled) that must leave files unchanged
+- Status printing the active path versus the workspace root
+- Home `tasks-enabled` flag (ignored by design)
 - Stop-hook continuation budget and run JSON shape
 - Host-specific session-start JSON
 - `validate.mjs` forbidden-surface scanning (see `verify-rivet`)

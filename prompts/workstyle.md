@@ -154,6 +154,8 @@ var conn = new MySqlConnection(connectionString);
 
 ## 7. 커밋 메시지
 
+Windows PowerShell에서는 `&&`로 git을 이어 쓰지 않는다. `git add` 뒤 `$LASTEXITCODE`를 확인한 다음 `git commit`한다. `git rebase --continue`는 같은 호출에서 `$env:GIT_EDITOR = "true"`를 둔다.
+
 Conventional Commits 형식의 짧은 한 줄로 쓰고, 본문은 쓰지 않는다.
 
 형식: `<type>: <요약>`

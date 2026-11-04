@@ -52,3 +52,5 @@ Rivet TASK tracking is enabled for this project.
 ## 확인
 
 프로젝트 파일의 블록, 훅의 스킬 호출 안내, `TASK enabled`, script, scope, 스킬의 규칙 읽기와 등록된 미완료 항목에 대한 종료 훅 응답을 확인한다. 설정 변경, CLI·훅 입력 검사, 실제 모델 세션 검증을 구분해 보고한다.
+
+Windows 인코딩 회귀 테스트는 [TASK 규칙](../prompts/tasks.md)의 `` `$OutputEncoding = ...` `` 한 줄을 그대로 긁어 실행한다. 그 문장을 바꿔 쓰면 테스트가 깨진다.
