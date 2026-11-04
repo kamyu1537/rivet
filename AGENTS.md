@@ -3,7 +3,7 @@
 ## 설치 요청
 
 - 사용자가 이 플러그인 설치를 요청하면 [rivet-setup](skills/rivet-setup/SKILL.md)을 따른다.
-- TASK를 켤지 묻는다. 사용자가 켠다고 하고 프로젝트가 아직 켜져 있지 않을 때만 `CLAUDE.md` 또는 `AGENTS.md`를 묻고 답을 기다린다. 이미 답한 선택은 다시 묻지 않는다. 비대화형 실행에서는 답이 없는 선택을 건너뛰고 그 사실을 보고한다.
+- TASK 켜기·끄기·파일 선택은 [TASK 설정](setup/tasks-setup.md)을 따른다.
 - 외부 플러그인 설치는 요청하거나 실행하지 않는다.
 - 공통 규칙은 플러그인 훅으로 전달한다. `CLAUDE.md`나 `AGENTS.md`에 workstyle 본문을 복사하지 않는다.
 

@@ -47,6 +47,12 @@ const taskFileNames = ["CLAUDE.md", "AGENTS.md"];
 const taskStart = "<!-- rivet-tasks:start -->";
 const taskEnd = "<!-- rivet-tasks:end -->";
 const taskBody = "Rivet TASK tracking is enabled for this project.";
+const TaskKind = {
+  absent: "absent",
+  none: "none",
+  one: "one",
+  broken: "broken",
+};
 
 function taskLines(text) {
   const endsWithNewline = text.endsWith("\n");
@@ -58,24 +64,30 @@ function taskLines(text) {
 function classifyTaskText(text) {
   const lines = taskLines(text);
   const markers = lines.filter((line) => line === taskStart || line === taskEnd);
-  if (markers.length === 0) return "none";
+  if (markers.length === 0) return TaskKind.none;
   let blocks = 0;
   for (let index = 0; index + 2 < lines.length; index += 1) {
     if (lines[index] === taskStart && lines[index + 1] === taskBody && lines[index + 2] === taskEnd) blocks += 1;
   }
-  return blocks === 1 && markers.length === 2 ? "one" : "broken";
+  return blocks === 1 && markers.length === 2 ? TaskKind.one : TaskKind.broken;
+}
+
+function hasSingleValidBlock(files) {
+  const active = files.filter((file) => file.kind === TaskKind.one);
+  if (active.length !== 1) return null;
+  const othersOk = files.every((file) => file === active[0] || file.kind === TaskKind.absent || file.kind === TaskKind.none);
+  return othersOk ? active[0] : null;
 }
 
 function projectTasks(cwd) {
   const { root } = findWorkspace(cwd);
   const files = taskFileNames.map((name) => {
     const path = join(root, name);
-    if (!existsSync(path)) return { name, path, kind: "absent" };
+    if (!existsSync(path)) return { name, path, kind: TaskKind.absent };
     return { name, path, kind: classifyTaskText(readFileSync(path, "utf8")) };
   });
-  const active = files.filter((file) => file.kind === "one");
-  const enabled = active.length === 1 && files.every((file) => file === active[0] || file.kind === "absent" || file.kind === "none");
-  return { root, files, enabled, active: enabled ? active[0] : null };
+  const active = hasSingleValidBlock(files);
+  return { root, files, enabled: active !== null, active };
 }
 
 export function tasksEnabled(cwd) {
