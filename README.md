@@ -122,9 +122,9 @@ pnpm run test
 
 ## 업데이트
 
-Claude Code, Codex, OMP는 각 마켓플레이스 업데이트 명령을 쓴다. Cursor는 `~/.cursor/plugins/local/rivet`에서 `git pull`한 뒤 창을 다시 불러온다. 공통 규칙은 다음 세션부터 적용된다.
+Claude Code, Codex, OMP는 각 마켓플레이스 업데이트 명령을 사용합니다. Cursor는 `~/.cursor/plugins/local/rivet`에서 `git pull`한 뒤 창을 다시 불러옵니다. 공통 규칙은 다음 세션부터 적용됩니다.
 
-설치 스킬은 `/rivet:rivet-setup`이다. TASK는 `/rivet:tasks-setup`으로 켜고 끈다. 2.0.0부터 TASK는 프로젝트의 `CLAUDE.md` 또는 `AGENTS.md` 블록으로만 켜진다. `~/.config/rivet/tasks-enabled`는 무시되며 삭제되지 않는다.
+설치 스킬은 `/rivet:rivet-setup`입니다. TASK는 `/rivet:tasks-setup`으로 켜고 끕니다. 2.0.0부터 TASK는 프로젝트의 `CLAUDE.md` 또는 `AGENTS.md` 블록으로만 켜집니다. `~/.config/rivet/tasks-enabled`는 무시되며 삭제되지 않습니다.
 
 ### Codex 업데이트
 
