@@ -171,3 +171,58 @@ Conventional Commits 형식의 짧은 한 줄로 쓰고, 본문은 쓰지 않는
 근거와 세부 내용은 사용자에게 보내는 응답, 머지 리퀘스트 설명, `docs/`에 적는다. 커밋 메시지에는 적지 않는다.
 
 본문은 사용자가 명시적으로 요청한 경우에만 쓴다.
+
+## 8. 접근 제어자
+
+접근 제어자는 언어 기본값과 같아도 생략하지 않고 적는다.
+
+- C#: 최상위·중첩 타입(class, struct, record, interface, enum, delegate)과 모든 멤버(필드, 상수, 프로퍼티, 인덱서, 메서드, 생성자, 이벤트, 연산자)에 `public`, `internal`, `protected`, `private`, `protected internal`, `private protected` 중 하나를 적는다. `class Foo` 가 아니라 `internal class Foo`, `int _count;` 가 아니라 `private int _count;` 로 쓴다. 인터페이스 멤버에도 `public` 을 적는다.
+- TypeScript: 클래스 멤버(필드, 메서드, 생성자, 접근자, 생성자 파라미터 프로퍼티)에 `public`, `protected`, `private` 중 하나를 적는다.
+- 언어가 접근 제어자를 허용하지 않는 곳만 예외다: C# 명시적 인터페이스 구현(`void IFoo.Bar()`), 정적 생성자, 종료자, enum 멤버, 지역 함수, 네임스페이스. Rust처럼 비공개를 나타내는 키워드가 없는 언어는 이 규칙을 적용하지 않는다.
+- 새로 쓰거나 수정하는 선언에 적용한다. 기존 코드의 누락은 §3에 따라 보고만 하고, 일괄 수정은 사용자가 요청할 때만 한다.
+- 작업을 끝내기 전에 자신이 추가·수정한 선언에 접근 제어자가 빠졌는지 확인한다.
+
+### 8.1. 린트로 강제
+
+- C# .NET SDK 프로젝트: `.editorconfig`의 `[*.cs]` 절에 아래 두 줄을 두고, `Directory.Build.props`(없으면 각 `.csproj`)에 `<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>`를 둬서 누락이 빌드 오류가 되게 한다.
+
+  ```ini
+  dotnet_style_require_accessibility_modifiers = always
+  dotnet_diagnostic.IDE0040.severity = error
+  ```
+
+- Unity 프로젝트: Unity 컴파일러는 IDE0040을 검사하지 않는다. 같은 `.editorconfig`를 저장소 루트에 둬서 IDE(Rider, Visual Studio)에 오류로 표시되게 하고, 빌드가 막아 주지 않으므로 완료 전 확인을 직접 한다.
+- TypeScript: ESLint 설정에 `"@typescript-eslint/explicit-member-accessibility": ["error", { "accessibility": "explicit" }]`를 둔다.
+- 이 린트를 `#pragma warning disable IDE0040`, `// eslint-disable`, 심각도 하향, 규칙 삭제로 우회하지 않는다.
+- 린트 설정이 없는 저장소에 새로 들이는 일(`.editorconfig` 추가, ESLint 도입)은 다른 작업 중에 곁다리로 하지 않는다. 없다고 보고하고 사용자가 정하게 한다.
+- 규칙을 켜면 기존 누락이 한꺼번에 오류가 된다. 린트 도입과 기존 코드 일괄 수정은 한 작업으로 묶어, 빌드와 테스트가 통과한 상태로 끝낸다.
+
+## 9. 테스트를 위해 프로덕션 API를 열지 않는다
+
+테스트를 쉽게 하려고 프로덕션 코드의 접근성이나 시그니처를 바꾸지 않는다.
+
+- 테스트를 위해 멤버를 `virtual`, `internal`, `public`으로 승격하지 않는다.
+- 테스트를 위해 `InternalsVisibleTo`를 추가하지 않는다.
+- 기존 메서드에 테스트 전용 파라미터를 추가하지 않는다.
+- 확장 지점이 꼭 필요하면, 이번 작업에서 새로 만든 클래스 안에서 해결한다.
+- 이 제약을 지키면서는 불가능하다면, 테스트 범위를 줄이거나 왜 깔끔하게 구현할 수 없는지 보고한다.
+
+## 10. 패키지 관리 (Node.js)
+
+### 10.1. 패키지 매니저
+
+패키지 관리는 pnpm으로 한다. `npm`, `yarn`, `bun`은 쓰지 않는다. 10.2가 명시적으로 적용되지 않는 한 신규·기존 프로젝트 모두에 해당한다.
+
+- `pnpm init`, `pnpm add`, `pnpm install`을 쓴다.
+- `package-lock.json`을 만들지 않는다.
+- 스크립트는 `pnpm run`으로 실행한다.
+- `npx` 대신 `pnpm dlx`를 쓴다. `npm run`, `npx`를 쓰지 않는다.
+- CI에서는 `pnpm/action-setup` 후 `pnpm install --frozen-lockfile`을 쓴다. `npm ci`를 쓰지 않는다.
+
+### 10.2. npm 프로젝트를 pnpm으로 전환
+
+다른 작업을 하다가 곁다리로 전환하지 않는다.
+
+저장소가 현재 npm을 쓰고 있으면 그 사실을 보고하고, 전환 비용(락파일 재생성, CI 변경, 전이 의존성 해석 변화 가능성)을 설명한 뒤, 사용자가 결정하게 한다.
+
+사용자가 명시적으로 요청하면 `pnpm import`를 실행하고, `package-lock.json`을 삭제하고, CI를 pnpm으로 갱신한 뒤, 빌드와 테스트를 실행한다. 빌드와 테스트가 통과한 뒤에만 전환 완료로 보고한다.

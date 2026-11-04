@@ -85,7 +85,7 @@ function checkForbidden(directory) {
 }
 checkForbidden(root);
 
-const situationalOnly = ["workstyle-access", "workstyle-pnpm", "workstyle-root-cause", "workstyle-test-surface"];
+const situationalOnly = ["workstyle-root-cause"];
 const skillNames = readdirSync(join(root, "skills"), { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
 assert.deepEqual(
   skillNames.filter((name) => name.startsWith("workstyle-")),

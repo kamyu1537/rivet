@@ -26,10 +26,7 @@ test("Codex marketplace source ships working hooks and skill dependencies withou
     "rivet-setup",
     "tasks-setup",
     "workstyle",
-    "workstyle-access",
-    "workstyle-pnpm",
     "workstyle-root-cause",
-    "workstyle-test-surface",
   ]);
   const checkLinks = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {

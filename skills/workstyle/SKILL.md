@@ -11,12 +11,9 @@ description: 세션 시작 훅이 지정한 필수 스킬이다. 요청 종류�
 
 세션 시작 훅은 `prompts/session-start.md`와 workstyle 스킬 경로만 넣는다. `prompts/workstyle.md`나 `prompts/tasks.md` 본문을 인라인하지 않는다. 훅 문맥은 약 2KB(`Buffer.byteLength` 기준) 안에 둔다.
 
-매 작업·매 파일 쓰기에 적용되는 규칙은 위 코어에만 둔다. 주석·메타 서술, computer-use 승인, 커밋 메시지는 상황 스킬로 빼지 않는다. 특정 행동에만 해당하는 규칙만 아래 스킬로 두고, 그 행동 직전에 description으로 고른다. 네임스페이스가 있으면 `rivet:` 접두를 붙인다. 해당하지 않으면 호출하지 않는다.
+매 작업·매 파일 쓰기에 적용되는 규칙은 위 코어에만 둔다. 주석·메타 서술, computer-use 승인, 커밋 메시지, 접근 제어자, 테스트용 API 개방, 패키지 매니저는 상황 스킬로 빼지 않는다. 빠뜨림을 막는 규칙은 호출할 계기를 알아챌 수 없으므로 코어에 둔다. 특정 행동에만 해당하는 규칙만 아래 스킬로 두고, 그 행동 직전에 description으로 고른다. 네임스페이스가 있으면 `rivet:` 접두를 붙인다. 해당하지 않으면 호출하지 않는다.
 
 - `workstyle-root-cause`: 버그·이상 동작을 조사하거나 수정할 때
-- `workstyle-test-surface`: 테스트를 위해 프로덕션 API·접근성을 바꾸려 할 때
-- `workstyle-pnpm`: Node 패키지 설치·잠금·스크립트·CI 패키지 단계를 다룰 때
-- `workstyle-access`: C#·TypeScript 접근 제어자나 그 린트를 다룰 때
 
 ## TASK
 
