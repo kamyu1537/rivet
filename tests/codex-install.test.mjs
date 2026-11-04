@@ -22,7 +22,18 @@ test("Codex marketplace source ships working hooks and skill dependencies withou
   const manifest = JSON.parse(readFileSync(join(plugin, ".codex-plugin/plugin.json"), "utf8"));
   assert.equal(manifest.name, marketplace.plugins[0].name);
   assert.equal(manifest.version, JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version);
-  assert.deepEqual(readdirSync(resolve(plugin, manifest.skills)).sort(), ["rivet-setup", "tasks-setup", "workstyle"]);
+  assert.deepEqual(readdirSync(resolve(plugin, manifest.skills)).sort(), [
+    "rivet-setup",
+    "tasks-setup",
+    "workstyle",
+    "workstyle-access",
+    "workstyle-comments",
+    "workstyle-commits",
+    "workstyle-computer-use",
+    "workstyle-pnpm",
+    "workstyle-root-cause",
+    "workstyle-test-surface",
+  ]);
   const checkLinks = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const file = join(directory, entry.name);

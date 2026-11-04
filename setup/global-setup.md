@@ -4,7 +4,7 @@
 
 1. [공통 작업 규칙](../prompts/workstyle.md)을 읽는다. 현재 하네스의 지시 우선순위를 따른다.
 2. 플러그인이 없으면 [플러그인 설치](plugin-setup.md)를 따른다.
-3. 새 세션에서 하네스 훅이 `workstyle` 호출을 안내하고, 스킬이 공통 규칙을 끝까지 읽는지 확인한다. OMP는 session_start, session_switch, session_compact에서 보낸다. 다른 플러그인의 세션 시작 지시는 바꾸거나 미루지 않고 rivet과 함께 적용한다. 현재 세션에서는 규칙을 직접 읽어 적용할 수 있다.
+3. 새 세션에서 하네스 훅이 `workstyle` 호출을 안내하고, 스킬이 공통 코어를 끝까지 읽는지 확인한다. 주석·커밋·pnpm·computer-use 같은 상황 스킬은 세션 시작에 읽지 않고, 해당 행동 직전에 고른다. OMP는 session_start, session_switch, session_compact에서 보낸다. 다른 플러그인의 세션 시작 지시는 바꾸거나 미루지 않고 rivet과 함께 적용한다. 현재 세션에서는 규칙을 직접 읽어 적용할 수 있다.
 
 `CLAUDE.md`나 `AGENTS.md`에 workstyle 본문을 복사하지 않는다. 별도 전역 규칙 설정도 만들지 않는다. 플러그인을 비활성화한 뒤 새 세션을 시작하면 스킬 호출 안내가 멈춘다.
 
