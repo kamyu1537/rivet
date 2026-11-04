@@ -1,8 +1,8 @@
 {
   "name": "rivet",
-  "version": "1.4.2",
-  "description": "개인 작업 규칙, 선택적 TASK 추적과 독립 리뷰",
+  "version": "2.0.0",
+  "description": "개인 작업 규칙과 선택적 TASK 추적",
   "author": { "name": "kamyu1537" },
   "repository": "https://github.com/kamyu1537/rivet",
-  "keywords": ["setup", "review", "skills"]
+  "keywords": ["setup", "tasks", "skills"]
 }

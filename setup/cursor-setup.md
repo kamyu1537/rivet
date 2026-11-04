@@ -4,7 +4,7 @@
 
 1. [README의 Cursor 설치](../README.md#cursor)를 따른다.
 2. Cursor를 다시 불러오고 플러그인과 스킬이 발견되는지 확인한다.
-3. `sessionStart` 훅의 안내에 따라 `workstyle` 스킬이 공통 작업 규칙을 읽는지 확인한다. TASK는 [TASK 설정](tasks-setup.md)을 따른다.
+3. `sessionStart` 훅의 안내에 따라 `workstyle` 스킬이 공통 작업 규칙을 읽는지 확인한다. TASK는 [TASK 설정](tasks-setup.md)을 따른다. 블록은 프로젝트의 `CLAUDE.md` 또는 `AGENTS.md`에만 두고, workstyle 본문은 복사하지 않는다.
 4. Cursor와 다른 플러그인의 모델 설정을 새로 만들거나 덮어쓰지 않는다.
 
 ## 선택 규칙

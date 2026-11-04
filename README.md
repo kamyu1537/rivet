@@ -80,15 +80,26 @@ OMP 18.10.3의 확장 기능을 기준으로 구현했습니다. 설치나 업�
 
 ## TASK 활성화
 
-기본은 꺼져 있습니다. `tasks-setup` 스킬에 "TASK를 켜줘" 또는 "TASK를 꺼줘"라고 요청할 수 있습니다. 직접 바꾸려면 설치된 플러그인 루트에서 아래 명령을 실행합니다.
+기본은 꺼져 있습니다. 프로젝트 루트의 `CLAUDE.md`와 `AGENTS.md` 중 한 파일만 아래 블록을 가지고, 다른 파일은 없거나 마커가 없을 때 켜집니다. 루트는 Git worktree 최상위입니다. Git 저장소가 아니면 현재 디렉터리입니다.
+
+```text
+<!-- rivet-tasks:start -->
+Rivet TASK tracking is enabled for this project.
+<!-- rivet-tasks:end -->
+```
+
+`tasks-setup`에 "TASK를 켜줘" 또는 "TASK를 꺼줘"라고 요청할 수 있습니다. 직접 바꾸려면 프로젝트 루트에서 아래 명령을 실행합니다.
 
 | 목적 | 명령 |
 | --- | --- |
-| 켜기 | `node scripts/tasks.mjs enable` |
+| 꺼져 있을 때 켜기 | `node scripts/tasks.mjs enable --file CLAUDE.md` 또는 `node scripts/tasks.mjs enable --file AGENTS.md` |
+| 이미 켜져 있을 때 같은 파일로 맞추기 | `node scripts/tasks.mjs enable` |
 | 상태 확인 | `node scripts/tasks.mjs status` |
 | 끄기 | `node scripts/tasks.mjs disable` |
 
-TASK 설정은 지원하는 도구 모두에 함께 적용됩니다. 설정을 바꾼 뒤에는 새 세션을 시작하세요. 끄면 자동 계속 실행은 즉시 멈추고 기존 작업 기록은 남습니다.
+`status`는 켜져 있으면 `enabled`와 블록 파일 경로를, 꺼져 있으면 `disabled`와 프로젝트 루트를 출력합니다. 두 경우 모두 종료 코드는 0입니다. 꺼져 있을 때 파일 없이 `enable`을 실행하면 실패하고, 어느 파일을 쓸지 지정해야 합니다.
+
+블록이 둘인 파일, 본문이 다른 구간, 마커만 남은 파일은 끈 상태입니다. 끄면 두 파일에서 그 구간과 남은 마커 줄을 지웁니다. 공백만 남으면 그 파일을 삭제합니다. 진행 기록은 `~/.config/rivet/tasks/`에 남습니다. 설정을 바꾼 뒤 세션 문맥을 갱신하려면 새 세션을 시작하세요. 끄면 Stop 검사는 바로 멈춥니다.
 
 등록하지 않은 작업과 사용자가 따로 지정한 TODO 위치는 자동으로 검사하지 않습니다. 명령 형식과 상태 규칙은 [TASK 규칙](prompts/tasks.md)을, 저장·복구와 도구별 동작은 [TASK 설정](setup/tasks-setup.md)을 참고하세요.
 
