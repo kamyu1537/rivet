@@ -60,7 +60,7 @@ test("Codex marketplace source ships working hooks and skill dependencies withou
   const skillPath = JSON.parse(disabled.additionalContext.match(/^Workstyle skill: (.+)$/m)[1]);
   assert.equal(resolve(skillPath), resolve(plugin, manifest.skills, "workstyle/SKILL.md"));
   assert.ok(readFileSync(skillPath, "utf8").trim());
-  assert.equal(cli(["enable"]).status, 0);
+  assert.equal(cli(["enable", "--file", "AGENTS.md"]).status, 0);
   const context = fire("SessionStart", event).hookSpecificOutput.additionalContext;
   const scope = context.match(/TASK scope: ([a-f0-9]{64})/)[1];
   assert.equal(resolve(JSON.parse(context.match(/^TASK script: (.+)$/m)[1])), join(plugin, "scripts/tasks.mjs"));

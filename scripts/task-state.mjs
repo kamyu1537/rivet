@@ -1,16 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, realpathSync, renameSync, rmdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, realpathSync, renameSync, rmdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, isAbsolute, join, relative, sep } from "node:path";
+import { isAbsolute, join, relative, sep } from "node:path";
 
-export const tasksFlag = join(homedir(), ".config", "rivet", "tasks-enabled");
-
-export function tasksEnabled() {
-  return statSync(tasksFlag, { throwIfNoEntry: false })?.isFile() ?? false;
-}
-
-const directory = join(dirname(tasksFlag), "tasks");
+const directory = join(homedir(), ".config", "rivet", "tasks");
 const hosts = ["claude", "codex", "cursor", "omp"];
 const statuses = ["pending", "active", "done", "waiting", "cancelled"];
 const openStatuses = ["pending", "active"];
@@ -47,6 +41,116 @@ function findWorkspace(cwd) {
     if (error.code !== "ENOENT" && !String(error.stderr).includes("not a git repository")) throw error;
   }
   return { root: canonicalPath(root), git };
+}
+
+const taskFileNames = ["CLAUDE.md", "AGENTS.md"];
+const taskStart = "<!-- rivet-tasks:start -->";
+const taskEnd = "<!-- rivet-tasks:end -->";
+const taskBody = "Rivet TASK tracking is enabled for this project.";
+
+function taskLines(text) {
+  const endsWithNewline = text.endsWith("\n");
+  const lines = text.split(/\r?\n/);
+  if (endsWithNewline) lines.pop();
+  return lines;
+}
+
+function classifyTaskText(text) {
+  const lines = taskLines(text);
+  const markers = lines.filter((line) => line === taskStart || line === taskEnd);
+  if (markers.length === 0) return "none";
+  let blocks = 0;
+  for (let index = 0; index + 2 < lines.length; index += 1) {
+    if (lines[index] === taskStart && lines[index + 1] === taskBody && lines[index + 2] === taskEnd) blocks += 1;
+  }
+  return blocks === 1 && markers.length === 2 ? "one" : "broken";
+}
+
+function projectTasks(cwd) {
+  const { root } = findWorkspace(cwd);
+  const files = taskFileNames.map((name) => {
+    const path = join(root, name);
+    if (!existsSync(path)) return { name, path, kind: "absent" };
+    return { name, path, kind: classifyTaskText(readFileSync(path, "utf8")) };
+  });
+  const active = files.filter((file) => file.kind === "one");
+  const enabled = active.length === 1 && files.every((file) => file === active[0] || file.kind === "absent" || file.kind === "none");
+  return { root, files, enabled, active: enabled ? active[0] : null };
+}
+
+export function tasksEnabled(cwd) {
+  return projectTasks(cwd).enabled;
+}
+
+function stripTaskMarkers(text) {
+  const lines = taskLines(text);
+  if (!lines.some((line) => line === taskStart || line === taskEnd)) return text;
+  const newline = text.includes("\r\n") ? "\r\n" : "\n";
+  const endsWithNewline = text.endsWith("\n");
+  const kept = [];
+  let index = 0;
+  while (index < lines.length) {
+    if (lines[index] === taskStart) {
+      let end = -1;
+      for (let cursor = index + 1; cursor < lines.length; cursor += 1) {
+        if (lines[cursor] === taskEnd) {
+          end = cursor;
+          break;
+        }
+      }
+      index = end === -1 ? index + 1 : end + 1;
+      continue;
+    }
+    if (lines[index] === taskEnd) {
+      index += 1;
+      continue;
+    }
+    kept.push(lines[index]);
+    index += 1;
+  }
+  if (kept.length === 0) return "";
+  const body = kept.join(newline);
+  return endsWithNewline ? `${body}${newline}` : body;
+}
+
+function stripTaskFile(path) {
+  if (!existsSync(path)) return;
+  const text = readFileSync(path, "utf8");
+  const stripped = stripTaskMarkers(text);
+  if (stripped.trim() === "") {
+    unlinkSync(path);
+    return;
+  }
+  if (stripped !== text) writeFileSync(path, stripped);
+}
+
+function writeTaskBlock(path) {
+  const existing = existsSync(path) ? readFileSync(path, "utf8") : "";
+  const separator = existing.length > 0 && !existing.endsWith("\n") ? "\n" : "";
+  writeFileSync(path, `${existing}${separator}${taskStart}\n${taskBody}\n${taskEnd}\n`);
+}
+
+export function enableProjectTasks(cwd, fileName) {
+  const current = projectTasks(cwd);
+  let chosen = fileName;
+  if (chosen === undefined) {
+    if (!current.enabled) throw new Error("Pass --file CLAUDE.md or --file AGENTS.md");
+    chosen = current.active.name;
+  } else if (!taskFileNames.includes(chosen)) {
+    throw new Error(`Unknown --file value: ${chosen}`);
+  }
+  for (const name of taskFileNames) stripTaskFile(join(current.root, name));
+  writeTaskBlock(join(current.root, chosen));
+}
+
+export function disableProjectTasks(cwd) {
+  const { root } = findWorkspace(cwd);
+  for (const name of taskFileNames) stripTaskFile(join(root, name));
+}
+
+export function projectTaskStatus(cwd) {
+  const current = projectTasks(cwd);
+  return { enabled: current.enabled, path: current.enabled ? current.active.path : current.root };
 }
 
 function requireRegisteredWorkspace(root, cwd) {

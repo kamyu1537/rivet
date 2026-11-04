@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { cp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -9,7 +9,7 @@ import { test } from "node:test";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 
-test("installed hooks route to an internal skill within the startup budget and obey the TASK flag", async (t) => {
+test("installed hooks route to the workstyle skill within the startup budget and follow the project TASK block", async (t) => {
   const temp = realpathSync(mkdtempSync(join(tmpdir(), "rivet 한글 ")));
   t.after(() => rmSync(temp, { recursive: true, force: true }));
   const plugin = join(temp, "long plugin directory ".repeat(3).trim(), "installed plugins", "plugin copy");
@@ -19,6 +19,10 @@ test("installed hooks route to an internal skill within the startup budget and o
   const home = join(temp, "home");
   mkdirSync(home);
   const flag = join(home, ".config", "rivet", "tasks-enabled");
+  mkdirSync(dirname(flag), { recursive: true });
+  writeFileSync(flag, "preserve user content");
+  const block = "<!-- rivet-tasks:start -->\nRivet TASK tracking is enabled for this project.\n<!-- rivet-tasks:end -->\n";
+  const agents = join(workspace, "AGENTS.md");
   const env = { ...process.env, HOME: home, USERPROFILE: home };
   const run = (file, args = [], input) => spawnSync(process.execPath, [join(plugin, file), ...args], { cwd: workspace, env, encoding: "utf8", input: JSON.stringify(input) });
   const context = (host) => {
@@ -50,13 +54,24 @@ test("installed hooks route to an internal skill within the startup budget and o
     assertRules(actual, false);
     assert.doesNotMatch(actual, /TASK (script|scope|workspace|revision):/);
   }
-  assert.deepEqual(readdirSync(home), []);
-  assert.equal(run("scripts/tasks.mjs", ["status"]).stdout, `disabled\n${flag}\n`);
+  const disabledStatus = run("scripts/tasks.mjs", ["status"]);
+  assert.equal(disabledStatus.status, 0, disabledStatus.stderr);
+  assert.ok(disabledStatus.stdout.startsWith("disabled\n"));
+  const workspaceRoot = disabledStatus.stdout.slice("disabled\n".length, -1);
+  assert.equal(disabledStatus.stdout, `disabled\n${workspaceRoot}\n`);
+  assert.equal(readFileSync(flag, "utf8"), "preserve user content");
+  const missingFile = run("scripts/tasks.mjs", ["enable"]);
+  assert.notEqual(missingFile.status, 0);
+  assert.match(missingFile.stderr, /--file CLAUDE.md or --file AGENTS.md/);
+  assert.equal(existsSync(agents), false);
   for (let attempt = 0; attempt < 2; attempt++) {
-    const result = run("scripts/tasks.mjs", ["enable"]);
+    const result = run("scripts/tasks.mjs", ["enable", "--file", "AGENTS.md"]);
     assert.equal(result.status, 0, result.stderr);
-    assert.equal(result.stdout, `enabled\n${flag}\n`);
+    assert.equal(result.stdout, `enabled\n${join(workspaceRoot, "AGENTS.md")}\n`);
+    assert.equal(readFileSync(agents, "utf8"), block);
   }
+  assert.equal(existsSync(join(workspace, "CLAUDE.md")), false);
+  assert.equal(readFileSync(flag, "utf8"), "preserve user content");
   for (const host of ["claude", "codex", "cursor"]) {
     const actual = context(host);
     assertRules(actual, true);
@@ -71,21 +86,23 @@ test("installed hooks route to an internal skill within the startup budget and o
       assert.ok(!actualWorkspace.includes("\\"));
     }
   }
-  assert.equal(readFileSync(flag, "utf8"), "");
   const before = context("cursor");
   for (const file of ["workstyle", "tasks"]) writeFileSync(join(plugin, `prompts/${file}.md`), "규칙이 늘어도 시작 문맥은 커지지 않는다.\n".repeat(1000));
   assert.equal(context("cursor"), before);
-  writeFileSync(flag, "preserve user content");
-  assert.notEqual(run("scripts/tasks.mjs", ["disable"]).status, 0);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const result = run("scripts/tasks.mjs", ["disable"]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout, `disabled\n${workspaceRoot}\n`);
+  }
+  assert.equal(existsSync(agents), false);
   assert.equal(readFileSync(flag, "utf8"), "preserve user content");
-  writeFileSync(flag, "");
-  for (let attempt = 0; attempt < 2; attempt++) assert.equal(run("scripts/tasks.mjs", ["disable"]).stdout, `disabled\n${flag}\n`);
   assert.equal(context("claude"), disabled);
   assert.notEqual(run("scripts/tasks.mjs", ["unknown"]).status, 0);
   assert.notEqual(run("hooks/session-start.mjs", ["unknown"]).status, 0);
-  mkdirSync(flag);
-  assert.notEqual(run("scripts/tasks.mjs", ["enable"]).status, 0);
+  assert.notEqual(run("scripts/tasks.mjs", ["enable", "--file", "README.md"]).status, 0);
+  assert.equal(existsSync(agents), false);
   assert.equal(context("cursor"), disabled);
+  assert.equal(readFileSync(flag, "utf8"), "preserve user content");
 });
 
 test("OMP queues hidden context on startup, switching and compaction using the host context", async (t) => {

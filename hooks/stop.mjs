@@ -10,8 +10,9 @@ const cursor = host === "cursor";
 let result = { retry: false };
 try {
   const event = readJsonInput("{}");
+  const cwd = cursor ? event.workspace_roots?.[0] : event.cwd;
   const completed = cursor ? event.status === "completed" : true;
-  if (tasksEnabled() && completed) {
+  if (completed && tasksEnabled(cwd)) {
     result = cursor
       ? checkTaskStop(host, event.conversation_id, event.workspace_roots?.[0], event.loop_count > 0)
       : checkTaskStop(host, event.session_id, event.cwd, event.stop_hook_active === true);

@@ -17,6 +17,10 @@ function taskScopeDetails(host, sessionId, cwd) {
 
 export function sessionContext(host, sessionId, cwd) {
   const context = `${prompt("session-start.md")}\n\nWorkstyle skill: ${displayPath(fileURLToPath(new URL("../skills/workstyle/SKILL.md", import.meta.url)))}`;
-  if (!tasksEnabled()) return `${context}\nTASK enabled: false`;
+  try {
+    if (!tasksEnabled(cwd)) return `${context}\nTASK enabled: false`;
+  } catch (error) {
+    return `${context}\nTASK enabled: false\nTASK cannot verify or register this scope: ${error.message}. Report this limitation; do not guess a session ID or recreate registered state.`;
+  }
   return `${context}\nTASK enabled: true\n\n${taskScopeDetails(host, sessionId, cwd)}`;
 }

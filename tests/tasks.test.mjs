@@ -21,7 +21,11 @@ async function fixture(t) {
   mkdirSync(home);
   const env = { ...process.env, HOME: home, USERPROFILE: home };
   const run = (file, args, input, options = {}) => spawnSync(process.execPath, [join(plugin, file), ...args], { cwd, env, encoding: "utf8", input: input === undefined ? undefined : JSON.stringify(input), ...options });
-  const cli = (action, scope, input, options) => run("scripts/tasks.mjs", [action, ...(scope ? ["--scope", scope] : [])], input, options);
+  const cli = (action, scope, input, options) => {
+    const fileArgs = action === "enable" ? ["--file", "AGENTS.md"] : [];
+    const scopeArgs = action !== "enable" && scope ? ["--scope", scope] : [];
+    return run("scripts/tasks.mjs", [action, ...fileArgs, ...scopeArgs], input, options);
+  };
   const hook = (host, event = {}, stop = false) => run(stop ? "hooks/stop.mjs" : "hooks/session-start.mjs", [host], {
     ...(host === "cursor" ? { conversation_id: "session-A", workspace_roots: [cwd] }
       : { session_id: "session-A", cwd, hook_event_name: stop ? "Stop" : "SessionStart" }),
@@ -242,21 +246,27 @@ test("Git worktrees, hosts and sessions are isolated while subdirectories share 
   mkdirSync(subdir);
   assert.equal(f.start("claude", { cwd: subdir }), scope);
   assert.equal(f.cli("show", scope, undefined, { cwd: subdir }).status, 0);
-  assert.notEqual(f.start("claude", { cwd: other }), scope);
   assert.notEqual(f.start("claude", { session_id: "session-B" }), scope);
   assert.notEqual(f.start("codex"), scope);
   assert.notEqual(f.start("cursor"), scope);
+  const otherContext = f.good(f.hook("claude", { cwd: other })).hookSpecificOutput.additionalContext;
+  assert.match(otherContext, /TASK enabled: false/);
+  assert.equal(otherContext.includes("TASK scope:"), false);
   assert.equal(f.cli("show", scope, undefined, { cwd: other }).status, 1);
   assert.deepEqual(f.good(f.hook("claude", { cwd: other }, true)), {});
   const outside = join(f.temp, "plain");
   mkdirSync(outside);
+  assert.equal(f.cli("enable", undefined, undefined, { cwd: outside }).status, 0);
   const plainScope = f.start("claude", { cwd: outside });
   const nested = join(outside, "nested");
   mkdirSync(nested);
-  assert.equal(f.cli("show", plainScope, undefined, { cwd: nested }).status, 0);
+  assert.equal(f.cli("show", plainScope, undefined, { cwd: nested }).status, 1);
+  assert.match(f.good(f.hook("claude", { cwd: nested })).hookSpecificOutput.additionalContext, /TASK enabled: false/);
   const init = spawnSync("git", ["init", nested], { encoding: "utf8" });
   assert.equal(init.status, 0, init.stderr);
   assert.equal(f.cli("show", plainScope, undefined, { cwd: nested }).status, 1);
+  assert.equal(f.cli("enable", undefined, undefined, { cwd: nested }).status, 0);
+  assert.notEqual(f.start("claude", { cwd: nested }), plainScope);
 });
 
 test("Windows 8.3 short paths share the long path scope", { skip: process.platform !== "win32" && "Windows only" }, async (t) => {
@@ -413,4 +423,126 @@ test("OMP uses session_stop continuation contract and skips aborted and error st
   const result = spawnSync(process.execPath, ["--input-type=module", "-e", source], { cwd: f.cwd, env: f.env, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stdout, "OMP stop contract verified");
+});
+
+test("TASK activation follows one project file block and ignores the home flag", async (t) => {
+  const temp = mkdtempSync(join(tmpdir(), "task-block "));
+  t.after(() => rmSync(temp, { recursive: true, force: true }));
+  const workspace = join(temp, "workspace");
+  const home = join(temp, "home");
+  mkdirSync(workspace);
+  mkdirSync(join(home, ".config", "rivet"), { recursive: true });
+  const flag = join(home, ".config", "rivet", "tasks-enabled");
+  writeFileSync(flag, "still here");
+  const env = { ...process.env, HOME: home, USERPROFILE: home };
+  const block = "<!-- rivet-tasks:start -->\nRivet TASK tracking is enabled for this project.\n<!-- rivet-tasks:end -->\n";
+  const claude = join(workspace, "CLAUDE.md");
+  const agents = join(workspace, "AGENTS.md");
+  const run = (args, cwd = workspace) => spawnSync(process.execPath, [join(root, "scripts/tasks.mjs"), ...args], { cwd, env, encoding: "utf8" });
+  const hook = (cwd = workspace) => {
+    const result = spawnSync(process.execPath, [join(root, "hooks/session-start.mjs"), "claude"], {
+      cwd, env, encoding: "utf8", input: JSON.stringify({ session_id: "block-session", cwd }),
+    });
+    assert.equal(result.status, 0, result.stderr);
+    return JSON.parse(result.stdout).hookSpecificOutput.additionalContext;
+  };
+  const status = (cwd = workspace) => {
+    const result = run(["status"], cwd);
+    assert.equal(result.status, 0, result.stderr);
+    const [state, path] = result.stdout.split("\n");
+    return { state, path, stdout: result.stdout };
+  };
+
+  const disabled = status();
+  assert.equal(disabled.stdout, `disabled\n${disabled.path}\n`);
+  assert.match(hook(), /TASK enabled: false/);
+  assert.equal(hook().includes("TASK scope:"), false);
+  assert.equal(readFileSync(flag, "utf8"), "still here");
+  const refused = run(["enable"]);
+  assert.equal(refused.status, 1);
+  assert.match(refused.stderr, /--file CLAUDE.md or --file AGENTS.md/);
+  assert.equal(existsSync(claude), false);
+  assert.equal(existsSync(agents), false);
+  assert.equal(run(["enable", "--file", "README.md"]).status, 1);
+  assert.equal(existsSync(join(workspace, "README.md")), false);
+
+  writeFileSync(claude, "keep\n");
+  const enabled = run(["enable", "--file", "AGENTS.md"]);
+  assert.equal(enabled.status, 0, enabled.stderr);
+  assert.equal(readFileSync(claude, "utf8"), "keep\n");
+  assert.equal(readFileSync(agents, "utf8"), block);
+  assert.equal(status().stdout, `enabled\n${join(disabled.path, "AGENTS.md")}\n`);
+  const context = hook();
+  assert.match(context, /TASK enabled: true/);
+  const scope = context.match(/TASK scope: ([a-f0-9]{64})/)?.[1];
+  assert.equal(typeof scope, "string");
+  const begin = spawnSync(process.execPath, [join(root, "scripts/tasks.mjs"), "begin", "--scope", scope], {
+    cwd: workspace, env, encoding: "utf8",
+    input: JSON.stringify({ expectedRevision: 0, title: "Block", items: [{ id: "check", title: "Check block", verification: "Read the file" }] }),
+  });
+  assert.equal(begin.status, 0, begin.stderr);
+  const again = run(["enable"]);
+  assert.equal(again.status, 0, again.stderr);
+  assert.equal(readFileSync(agents, "utf8"), block);
+  assert.equal(readFileSync(claude, "utf8"), "keep\n");
+
+  writeFileSync(agents, `notes\n${block}tail\n`);
+  const converged = run(["enable"]);
+  assert.equal(converged.status, 0, converged.stderr);
+  assert.equal(readFileSync(agents, "utf8"), `notes\ntail\n${block}`);
+  assert.equal(status().state, "enabled");
+
+  writeFileSync(claude, `${block}<!-- rivet-tasks:start -->\nsecret\n<!-- rivet-tasks:end -->\nkept\n`);
+  writeFileSync(agents, block);
+  assert.equal(status().state, "disabled");
+  const moved = run(["enable", "--file", "CLAUDE.md"]);
+  assert.equal(moved.status, 0, moved.stderr);
+  assert.equal(readFileSync(claude, "utf8"), `kept\n${block}`);
+  assert.equal(existsSync(agents), false);
+  assert.equal(status().stdout, `enabled\n${join(disabled.path, "CLAUDE.md")}\n`);
+
+  writeFileSync(claude, "<!-- rivet-tasks:start -->\nkeep this line\n");
+  writeFileSync(agents, " \n");
+  const cleaned = run(["enable", "--file", "AGENTS.md"]);
+  assert.equal(cleaned.status, 0, cleaned.stderr);
+  assert.equal(readFileSync(claude, "utf8"), "keep this line\n");
+  assert.equal(readFileSync(agents, "utf8"), block);
+
+  writeFileSync(claude, block.replaceAll("\n", "\r\n"));
+  writeFileSync(agents, "plain\n");
+  assert.equal(status().stdout, `enabled\n${join(disabled.path, "CLAUDE.md")}\n`);
+  writeFileSync(agents, `${block}${block}`);
+  assert.equal(status().state, "disabled");
+  writeFileSync(agents, "plain\n");
+  writeFileSync(claude, "<!-- rivet-tasks:start -->\nwrong body\n<!-- rivet-tasks:end -->\n");
+  assert.equal(status().state, "disabled");
+  const off = run(["disable"]);
+  assert.equal(off.status, 0, off.stderr);
+  assert.equal(off.stdout, `disabled\n${disabled.path}\n`);
+  assert.equal(readFileSync(agents, "utf8"), "plain\n");
+  assert.equal(existsSync(claude), false);
+  const offAgain = run(["disable"]);
+  assert.equal(offAgain.status, 0, offAgain.stderr);
+  assert.equal(offAgain.stdout, off.stdout);
+  assert.equal(readFileSync(flag, "utf8"), "still here");
+  const denied = spawnSync(process.execPath, [join(root, "scripts/tasks.mjs"), "begin", "--scope", scope], {
+    cwd: workspace, env, encoding: "utf8",
+    input: JSON.stringify({ expectedRevision: 1, title: "No", items: [{ id: "check", title: "No", verification: "Exit" }] }),
+  });
+  assert.equal(denied.status, 1);
+  assert.match(denied.stderr, /disabled/);
+  assert.match(hook(), /TASK enabled: false/);
+
+  const repo = join(temp, "repo");
+  const child = join(repo, "child");
+  mkdirSync(child, { recursive: true });
+  const init = spawnSync("git", ["init", repo], { encoding: "utf8" });
+  assert.equal(init.status, 0, init.stderr);
+  const fromChild = run(["enable", "--file", "CLAUDE.md"], child);
+  assert.equal(fromChild.status, 0, fromChild.stderr);
+  assert.equal(existsSync(join(child, "CLAUDE.md")), false);
+  assert.equal(existsSync(join(repo, "AGENTS.md")), false);
+  assert.equal(readFileSync(join(repo, "CLAUDE.md"), "utf8"), block);
+  assert.equal(status(child).stdout, status(repo).stdout);
+  assert.equal(status(child).state, "enabled");
 });
