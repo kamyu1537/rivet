@@ -7,7 +7,7 @@
 3. 설치된 플러그인 루트에서 켜기는 `node scripts/tasks.mjs enable`, 끄기는 `node scripts/tasks.mjs disable`을 실행한다.
 4. `node scripts/tasks.mjs status`로 결과를 확인한다.
 
-`~/.config/rivet/tasks-enabled`가 있으면 지원 하네스 모두에서 TASK 활성화 상태와 scope를 전달하고, `internal-workstyle` 스킬이 TASK 규칙을 읽는다. 활성화 파일의 내용은 읽지 않는다. 하네스 설정이나 규칙 사본은 만들지 않는다.
+`~/.config/rivet/tasks-enabled`가 있으면 지원 하네스 모두에서 TASK 활성화 상태와 scope를 전달하고, `workstyle` 스킬이 TASK 규칙을 읽는다. 활성화 파일의 내용은 읽지 않는다. 하네스 설정이나 규칙 사본은 만들지 않는다.
 
 ## 적용
 

@@ -4,7 +4,7 @@
 
 1. [README의 Cursor 설치](../README.md#cursor)를 따른다.
 2. Cursor를 다시 불러오고 플러그인과 스킬이 발견되는지 확인한다.
-3. `sessionStart` 훅의 안내에 따라 `internal-workstyle` 스킬이 공통 작업 규칙을 읽는지 확인한다. TASK는 [TASK 설정](tasks-setup.md)을 따른다.
+3. `sessionStart` 훅의 안내에 따라 `workstyle` 스킬이 공통 작업 규칙을 읽는지 확인한다. TASK는 [TASK 설정](tasks-setup.md)을 따른다.
 4. Cursor와 다른 플러그인의 모델 설정을 새로 만들거나 덮어쓰지 않는다.
 
 ## 선택 규칙
@@ -19,4 +19,4 @@
 
 ## 확인
 
-설치된 스킬과 훅을 확인한다. 시작 훅은 비동기이므로 첫 응답 전에 규칙을 읽었다고 단정하지 않는다. 첫 요청에 확실히 적용해야 하면 [공통 작업 규칙](../prompts/global.md)을 직접 읽도록 요청한다.
+설치된 스킬과 훅을 확인한다. 시작 훅은 비동기이므로 첫 응답 전에 규칙을 읽었다고 단정하지 않는다. 첫 요청에 확실히 적용해야 하면 [공통 작업 규칙](../prompts/workstyle.md)을 직접 읽도록 요청한다.

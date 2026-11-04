@@ -6,10 +6,10 @@
 
 ## 기능
 
-- 하네스 훅이 [internal-workstyle](skills/internal-workstyle/SKILL.md) 스킬 호출을 안내하고, 스킬이 [공통 작업 규칙](prompts/global.md)을 읽고 적용합니다. 훅은 짧은 안내와 설치된 스킬의 절대 경로를 전달합니다.
+- 하네스 훅이 [workstyle](skills/workstyle/SKILL.md) 스킬 호출을 안내하고, 스킬이 [공통 작업 규칙](prompts/workstyle.md)을 읽고 적용합니다. 훅은 짧은 안내와 설치된 스킬의 절대 경로를 전달합니다.
 - TASK를 켜면 작업 계획, 진행 상태와 검증 근거를 기록합니다. 등록된 미완료 항목이 있으면 계획당 최대 2회 계속 실행을 요청합니다.
 
-`rivet-setup`은 설치와 초기 설정을, `tasks-setup`은 TASK 켜기와 끄기를 담당합니다. `internal-` 접두사가 붙은 스킬은 주로 훅, 설치 절차와 다른 스킬이 호출합니다. 스킬 호출 도구가 없으면 해당 스킬 파일을 직접 읽고 따릅니다.
+`rivet-setup`은 설치와 초기 설정을, `tasks-setup`은 TASK 켜기와 끄기를 담당합니다. 스킬 호출 도구가 없으면 해당 스킬 파일을 직접 읽고 따릅니다.
 
 ## 에이전트에게 설치 요청
 
@@ -62,7 +62,7 @@ Windows PowerShell:
 git clone https://github.com/kamyu1537/rivet.git "$env:USERPROFILE/.cursor/plugins/local/rivet"
 ```
 
-Cursor에서 창을 다시 불러온 뒤 Customize에서 플러그인, 스킬, Hooks를 확인합니다. 첫 요청에는 규칙이 아직 적용되지 않을 수 있습니다. 첫 요청부터 필요하면 [공통 작업 규칙](prompts/global.md)을 읽도록 요청하세요. [공식 로컬 설치 문서](https://cursor.com/docs/plugins#test-plugins-locally), [Cursor 훅 문서](https://cursor.com/docs/hooks)
+Cursor에서 창을 다시 불러온 뒤 Customize에서 플러그인, 스킬, Hooks를 확인합니다. 첫 요청에는 규칙이 아직 적용되지 않을 수 있습니다. 첫 요청부터 필요하면 [공통 작업 규칙](prompts/workstyle.md)을 읽도록 요청하세요. [공식 로컬 설치 문서](https://cursor.com/docs/plugins#test-plugins-locally), [Cursor 훅 문서](https://cursor.com/docs/hooks)
 
 Cursor Agent CLI `2026.10.01-e373342`에서는 스킬 읽기와 TASK 등록·완료가 동작합니다. 이 버전은 `--print` 실행에서 Stop 훅을 호출하지 않습니다. 대화형 실행도 사용자·프로젝트 Stop 훅 없이 플러그인 Stop 훅만 있으면 자동으로 계속 실행하지 않습니다. 이때는 완료 전에 [TASK 규칙](prompts/tasks.md)에 따라 `show`와 `check`로 상태를 확인합니다.
 

@@ -16,7 +16,7 @@ function taskScopeDetails(host, sessionId, cwd) {
 }
 
 export function sessionContext(host, sessionId, cwd) {
-  const context = `${prompt("session-start.md")}\n\nWorkstyle skill: ${displayPath(fileURLToPath(new URL("../skills/internal-workstyle/SKILL.md", import.meta.url)))}`;
+  const context = `${prompt("session-start.md")}\n\nWorkstyle skill: ${displayPath(fileURLToPath(new URL("../skills/workstyle/SKILL.md", import.meta.url)))}`;
   if (!tasksEnabled()) return `${context}\nTASK enabled: false`;
   return `${context}\nTASK enabled: true\n\n${taskScopeDetails(host, sessionId, cwd)}`;
 }

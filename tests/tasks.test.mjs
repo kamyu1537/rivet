@@ -340,7 +340,7 @@ test("Windows PowerShell UTF-8 pipelines register Cursor scopes", { skip: proces
     assert.equal(result.status, 0, failure);
     assert.equal(result.stderr, "", failure);
     const context = JSON.parse(result.stdout).additional_context;
-    assert.equal(resolve(JSON.parse(context.match(/^Workstyle skill: (.+)$/m)?.[1])), join(f.plugin, "skills", "internal-workstyle", "SKILL.md"), `${shell}: skill path`);
+    assert.equal(resolve(JSON.parse(context.match(/^Workstyle skill: (.+)$/m)?.[1])), join(f.plugin, "skills", "workstyle", "SKILL.md"), `${shell}: skill path`);
     assert.equal(resolve(JSON.parse(context.match(/^TASK script: (.+)$/m)?.[1])), join(f.plugin, "scripts", "tasks.mjs"), `${shell}: script path`);
     assert.equal(resolve(JSON.parse(context.match(/^TASK workspace: (.+)$/m)?.[1])), realpathSync.native(f.cwd).toLowerCase(), `${shell}: workspace path`);
     const scope = context.match(/TASK scope: ([a-f0-9]{64})/)?.[1];

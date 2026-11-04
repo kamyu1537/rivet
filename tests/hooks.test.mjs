@@ -30,7 +30,7 @@ test("installed hooks route to an internal skill within the startup budget and o
     return payload.hookSpecificOutput.additionalContext;
   };
   const bootstrap = readFileSync(join(plugin, "prompts/session-start.md"), "utf8").trim();
-  const skillPath = join(plugin, "skills/internal-workstyle/SKILL.md");
+  const skillPath = join(plugin, "skills/workstyle/SKILL.md");
   const assertRules = (actual, tasks) => {
     assert.ok(Buffer.byteLength(actual, "utf8") < 2000, "startup context must fit the ~2 KB hook output preview");
     assert.ok(actual.startsWith(bootstrap));
@@ -40,7 +40,7 @@ test("installed hooks route to an internal skill within the startup budget and o
     if (process.platform === "win32") assert.ok(!actualPath.includes("\\"), "Windows display paths use forward slashes");
     const skill = readFileSync(actualPath, "utf8");
     const references = [...skill.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)].map((match) => resolve(dirname(actualPath), match[1]));
-    assert.deepEqual(references, [join(plugin, "prompts/global.md"), join(plugin, "prompts/tasks.md")]);
+    assert.deepEqual(references, [join(plugin, "prompts/workstyle.md"), join(plugin, "prompts/tasks.md")]);
     for (const path of references) assert.ok(readFileSync(path, "utf8").trim());
   };
   const disabled = context("claude");
@@ -73,7 +73,7 @@ test("installed hooks route to an internal skill within the startup budget and o
   }
   assert.equal(readFileSync(flag, "utf8"), "");
   const before = context("cursor");
-  for (const file of ["global", "tasks"]) writeFileSync(join(plugin, `prompts/${file}.md`), "규칙이 늘어도 시작 문맥은 커지지 않는다.\n".repeat(1000));
+  for (const file of ["workstyle", "tasks"]) writeFileSync(join(plugin, `prompts/${file}.md`), "규칙이 늘어도 시작 문맥은 커지지 않는다.\n".repeat(1000));
   assert.equal(context("cursor"), before);
   writeFileSync(flag, "preserve user content");
   assert.notEqual(run("scripts/tasks.mjs", ["disable"]).status, 0);

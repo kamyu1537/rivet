@@ -22,7 +22,7 @@ test("Codex marketplace source ships working hooks and skill dependencies withou
   const manifest = JSON.parse(readFileSync(join(plugin, ".codex-plugin/plugin.json"), "utf8"));
   assert.equal(manifest.name, marketplace.plugins[0].name);
   assert.equal(manifest.version, JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version);
-  assert.deepEqual(readdirSync(resolve(plugin, manifest.skills)).sort(), ["internal-workstyle", "rivet-setup", "tasks-setup"]);
+  assert.deepEqual(readdirSync(resolve(plugin, manifest.skills)).sort(), ["rivet-setup", "tasks-setup", "workstyle"]);
   const checkLinks = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const file = join(directory, entry.name);
@@ -58,7 +58,7 @@ test("Codex marketplace source ships working hooks and skill dependencies withou
   assert.equal(disabled.hookEventName, "SessionStart");
   assert.match(disabled.additionalContext, /TASK enabled: false/);
   const skillPath = JSON.parse(disabled.additionalContext.match(/^Workstyle skill: (.+)$/m)[1]);
-  assert.equal(resolve(skillPath), resolve(plugin, manifest.skills, "internal-workstyle/SKILL.md"));
+  assert.equal(resolve(skillPath), resolve(plugin, manifest.skills, "workstyle/SKILL.md"));
   assert.ok(readFileSync(skillPath, "utf8").trim());
   assert.equal(cli(["enable"]).status, 0);
   const context = fire("SessionStart", event).hookSpecificOutput.additionalContext;
