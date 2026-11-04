@@ -27,7 +27,7 @@ TLA+ model checked with TLC. Read every TLC result with the pstack `/statechart`
 | `scripts/task-state.mjs` | `classifyTaskText`, `hasSingleValidBlock`, `projectTasks`, `enableProjectTasks`, `disableProjectTasks` |
 | `scripts/tasks.mjs` | CLI enable/disable/status wiring |
 
-Sync commit: `102c04ddf093bd5b7e82e74be3d34295198508c9`
+Sync commit: `442c38d853a9e2fcf6a82589a406ed809d894d65`
 
 Move the sync commit forward only after you confirm this model still describes the code at the new commit.
 
