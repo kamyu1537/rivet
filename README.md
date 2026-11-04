@@ -124,7 +124,7 @@ pnpm run test
 
 마켓플레이스 업데이트 명령을 실행하거나 로컬 저장소를 갱신합니다. 공통 규칙은 다음 세션부터 적용됩니다.
 
-설치 스킬 이름이 `/rivet:internal-agent-setup`에서 `/rivet:rivet-setup`으로 바뀌었습니다. 업데이트 후에는 새 이름으로 호출하세요. TASK를 켜거나 끄는 `/rivet:tasks-setup`은 그대로입니다.
+설치 스킬은 `/rivet:rivet-setup`입니다. TASK는 `/rivet:tasks-setup`으로 켜고 끕니다. 2.0.0부터 TASK는 프로젝트의 `CLAUDE.md` 또는 `AGENTS.md` 블록으로만 켜집니다. `~/.config/rivet/tasks-enabled`는 무시되며 삭제되지 않습니다.
 
 ### Codex 업데이트
 
