@@ -6,7 +6,7 @@
 2. 사용자가 켜거나 끄라고 지정했으면 그 선택을 따른다. 지정이 없으면 스크립트 기반 TASK 추적과 미완료 작업 Stop 검사를 쓸지 묻고 답을 기다린다.
 3. 프로젝트 루트에서 `node scripts/tasks.mjs status`를 실행한다. 루트는 Git worktree 최상위다. Git 저장소가 아니거나 Git 실행 파일이 없으면 현재 디렉터리다.
 4. 켜져 있는데 사용자가 켠 상태를 유지하면 `node scripts/tasks.mjs enable`을 실행한다. 파일을 다시 묻지 않는다.
-5. 꺼져 있는데 사용자가 켠다고 했으면 `CLAUDE.md` 또는 `AGENTS.md`를 묻고 답을 기다린다. 그다음 `node scripts/tasks.mjs enable --file CLAUDE.md` 또는 `node scripts/tasks.mjs enable --file AGENTS.md`를 실행한다.
+5. 꺼져 있는데 사용자가 켠다고 했으면 `CLAUDE.md` 또는 `AGENTS.md`를 묻고 답을 기다린다. 답이 오기 전에 `enable`을 실행하지 않는다. 답이 오면 `node scripts/tasks.mjs enable --file CLAUDE.md` 또는 `node scripts/tasks.mjs enable --file AGENTS.md`를 실행한다. CLI는 파일을 묻지 않고, `--file` 없이 `enable`하면 실패한다.
 6. 사용자가 끄라고 했으면 `node scripts/tasks.mjs disable`을 실행한다. 파일을 묻지 않는다.
 7. `node scripts/tasks.mjs status`로 결과를 확인한다.
 8. 비대화형 실행에서는 답이 없는 선택을 건너뛰고 그 사실을 보고한다. 건너뛴 선택으로 블록을 만들지 않는다.
