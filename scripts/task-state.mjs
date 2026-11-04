@@ -11,7 +11,7 @@ export function tasksEnabled() {
 }
 
 const directory = join(dirname(tasksFlag), "tasks");
-const hosts = ["claude", "codex", "cursor", "omp", "gemini", "copilot", "opencode"];
+const hosts = ["claude", "codex", "cursor", "omp"];
 const statuses = ["pending", "active", "done", "waiting", "cancelled"];
 const openStatuses = ["pending", "active"];
 const historyActions = ["begin", "add", "set", "resume", "continue"];

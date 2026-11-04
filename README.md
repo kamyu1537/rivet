@@ -8,7 +8,6 @@
 
 - 하네스 훅이 [internal-workstyle](skills/internal-workstyle/SKILL.md) 스킬 호출을 안내하고, 스킬이 [공통 작업 규칙](prompts/global.md)을 읽고 적용합니다. 훅은 짧은 안내와 설치된 스킬의 절대 경로를 전달합니다.
 - TASK를 켜면 작업 계획, 진행 상태와 검증 근거를 기록합니다. 등록된 미완료 항목이 있으면 계획당 최대 2회 계속 실행을 요청합니다.
-- `cross-review`는 일반 교차 리뷰, `adversarial-cross-review`는 가정과 실패 경로까지 검토하는 공격적 교차 리뷰를 실행합니다. 두 스킬 모두 독립된 에이전트에게 읽기 전용으로 검토를 요청합니다.
 
 `rivet-setup`은 설치와 초기 설정을, `tasks-setup`은 TASK 켜기와 끄기를 담당합니다. `internal-` 접두사가 붙은 스킬은 주로 훅, 설치 절차와 다른 스킬이 호출합니다. 스킬 호출 도구가 없으면 해당 스킬 파일을 직접 읽고 따릅니다.
 
@@ -21,7 +20,7 @@ https://github.com/kamyu1537/rivet
 
 ## 설치
 
-Claude Code, Codex, Cursor, OMP, Gemini CLI, GitHub Copilot CLI, OpenCode를 지원합니다.
+Claude Code, Codex, Cursor, OMP를 지원합니다.
 
 Rivet에는 Node.js 18 이상이 필요합니다. 각 도구가 요구하는 Node.js 버전도 확인하세요. 설치 후에는 새 세션을 시작하세요.
 
@@ -79,43 +78,6 @@ omp plugin list --json
 
 OMP 18.10.3의 확장 기능을 기준으로 구현했습니다. 설치나 업데이트 후 OMP를 완전히 종료하고 다시 실행하세요. [OMP 마켓플레이스](https://omp.sh/docs/marketplace), [OMP 확장](https://github.com/can1357/oh-my-pi/blob/main/docs/extensions.md)
 
-### Gemini CLI
-
-저장소를 clone한 뒤 저장소 밖의 새 폴더에 전용 확장을 만들어 설치합니다. 원본 저장소 루트를 Gemini에 직접 설치하지 않습니다.
-
-```sh
-git clone https://github.com/kamyu1537/rivet.git
-cd rivet
-node scripts/package-gemini.mjs ../rivet-gemini
-gemini extensions install ../rivet-gemini
-gemini extensions list
-```
-
-설치 후 Gemini CLI를 다시 시작하세요. 스킬 호출 안내는 세션 시작·재개 때 전달하며, 대화가 압축된 직후에는 다시 전달하지 않습니다. [확장 설치](https://geminicli.com/docs/extensions/reference/)
-
-### GitHub Copilot CLI
-
-```sh
-copilot plugin install kamyu1537/rivet
-copilot plugin list
-```
-
-Copilot CLI 1.0.96을 기준으로 구현했습니다. 같은 이름의 개인 스킬이 있으면 그 스킬이 먼저 선택될 수 있습니다. 샌드박스가 `~/.config/rivet` 접근을 막으면 TASK를 사용할 수 없습니다. 스킬 호출 안내는 세션 시작·재개 때 전달하며, 대화가 압축된 직후에는 다시 전달하지 않습니다. [플러그인 설치](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference), [훅 규격](https://docs.github.com/en/copilot/reference/hooks-reference)
-
-### OpenCode
-
-저장소를 로컬에 받은 뒤 OpenCode 설정의 `plugin` 배열에 설치 경로를 추가합니다. 기존 항목과 다른 설정은 보존합니다.
-
-```json
-{
-  "plugin": ["file:///absolute/path/to/rivet/hooks/opencode.mjs"]
-}
-```
-
-Windows에서는 `file:///C:/path/to/rivet/hooks/opencode.mjs`처럼 씁니다. 실제 설치 경로로 바꾸고 OpenCode를 다시 시작하세요. 스킬은 함께 등록됩니다.
-
-OpenCode 1.19.0을 기준으로 구현했습니다. `opencode run`은 후속 요청 전에 종료될 수 있어 미완료 TASK의 자동 계속 실행을 보장하지 않습니다. [플러그인](https://opencode.ai/docs/plugins/), [설정](https://opencode.ai/docs/config/)
-
 ## TASK 활성화
 
 기본은 꺼져 있습니다. `tasks-setup` 스킬에 "TASK를 켜줘" 또는 "TASK를 꺼줘"라고 요청할 수 있습니다. 직접 바꾸려면 설치된 플러그인 루트에서 아래 명령을 실행합니다.
@@ -129,17 +91,6 @@ OpenCode 1.19.0을 기준으로 구현했습니다. `opencode run`은 후속 요
 TASK 설정은 지원하는 도구 모두에 함께 적용됩니다. 설정을 바꾼 뒤에는 새 세션을 시작하세요. 끄면 자동 계속 실행은 즉시 멈추고 기존 작업 기록은 남습니다.
 
 등록하지 않은 작업과 사용자가 따로 지정한 TODO 위치는 자동으로 검사하지 않습니다. 명령 형식과 상태 규칙은 [TASK 규칙](prompts/tasks.md)을, 저장·복구와 도구별 동작은 [TASK 설정](setup/tasks-setup.md)을 참고하세요.
-
-## 교차 리뷰
-
-| 호출 | 동작 |
-| --- | --- |
-| `/rivet:cross-review` | 변경 범위의 버그, 회귀, 요구사항과 검증 공백 확인 |
-| `/rivet:adversarial-cross-review` | 관련 호출 경로와 설계 가정을 따라 반례, 실패·복구, 보안·데이터·동시성 검토 |
-
-두 스킬은 사용자가 직접 호출할 때만 실행합니다. 리뷰를 요청하는 것만으로는 실행하지 않습니다. 호출 형식은 하네스마다 다릅니다. Codex는 `$cross-review`, Cursor와 OpenCode는 `/cross-review`처럼 호출합니다. Claude Code, Codex, Cursor, OpenCode는 자동 선택을 설정으로 막습니다. GitHub Copilot CLI, Gemini CLI, OMP는 이런 설정이 없어 스킬 설명으로만 제한합니다.
-
-스킬은 현재 세션에서 쓸 수 있는 독립 에이전트나 설치된 CLI(`codex`, `grok`, `cursor-agent`, `claude`)를 찾아 읽기 전용으로 리뷰합니다. 모델 ID를 고정하지 않고 CLI 기본값이나 모델 목록에서 고른 계열을 쓰며, 작성 모델과 다른 계열을 우선합니다. Cursor에서는 Grok과 Composer 계열만 쓰고, GPT 계열 리뷰는 `codex`로만 실행합니다. 사용할 수 있는 리뷰어가 없으면 설치하지 않고 교차 리뷰를 건너뛰며 그 사실을 보고합니다. 기존 인증과 구독 또는 API 연결을 사용하고, 두 모드 모두 리뷰어가 코드를 직접 수정하지 않습니다.
 
 ## 개발과 검증
 
@@ -174,11 +125,3 @@ codex plugin add rivet@rivet
 ```
 
 1.3.1에서 로컬 전용 패키지로 설치했다면 `codex plugin marketplace remove rivet`으로 기존 등록을 해제합니다. 그다음 [Codex 설치](#codex) 명령을 실행합니다. 1.3.2부터는 Codex용 패키지를 따로 만들지 않습니다.
-
-### Gemini CLI 업데이트
-
-갱신한 저장소에서 [Gemini CLI 설치](#gemini-cli) 순서에 따라 전용 패키지를 만들고 설치합니다. 출력 경로는 저장소 밖의 새 폴더로 지정하세요.
-
-### OpenCode 업데이트
-
-설정이 가리키는 로컬 저장소를 갱신하고 OpenCode를 다시 시작합니다.

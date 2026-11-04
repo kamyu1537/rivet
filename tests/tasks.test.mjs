@@ -24,15 +24,14 @@ async function fixture(t) {
   const cli = (action, scope, input, options) => run("scripts/tasks.mjs", [action, ...(scope ? ["--scope", scope] : [])], input, options);
   const hook = (host, event = {}, stop = false) => run(stop ? "hooks/stop.mjs" : "hooks/session-start.mjs", [host], {
     ...(host === "cursor" ? { conversation_id: "session-A", workspace_roots: [cwd] }
-      : host === "copilot" ? { sessionId: "session-A", cwd, stopReason: "end_turn" }
-      : { session_id: "session-A", cwd, hook_event_name: stop ? "AfterAgent" : "SessionStart" }),
+      : { session_id: "session-A", cwd, hook_event_name: stop ? "Stop" : "SessionStart" }),
     ...event,
   });
   const start = (host = "claude", event) => {
     const result = hook(host, event);
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
-    const context = host === "cursor" ? output.additional_context : host === "copilot" ? output.additionalContext : output.hookSpecificOutput.additionalContext;
+    const context = host === "cursor" ? output.additional_context : output.hookSpecificOutput.additionalContext;
     const scope = context.match(/TASK scope: ([a-f0-9]{64})/)?.[1];
     assert.equal(typeof scope, "string", context);
     return scope;
@@ -108,12 +107,12 @@ test("waiting and cancelled items remain incomplete and old runs can be resumed 
 
 test("Stop retries only the current scope and preserves its finite budget across edits and restart", async (t) => {
   const f = await fixture(t);
-  for (const host of ["claude", "codex", "cursor", "gemini", "copilot"]) {
+  for (const host of ["claude", "codex", "cursor"]) {
     const scope = f.start(host);
     let state = f.begin(scope);
     const event = host === "cursor" ? { status: "completed", loop_count: 0 } : { stop_hook_active: false };
     const first = f.good(f.hook(host, event, true));
-    if (host !== "cursor") assert.equal(first.decision, host === "gemini" ? "deny" : "block");
+    if (host !== "cursor") assert.equal(first.decision, "block");
     assert.match(host === "cursor" ? first.followup_message : first.reason, /build: Implement change/);
     assert.deepEqual(f.good(f.hook(host, { ...event, session_id: "other-session", sessionId: "other-session", conversation_id: "other-session" }, true)), {});
     state = f.good(f.cli("show", scope));
@@ -246,8 +245,7 @@ test("Git worktrees, hosts and sessions are isolated while subdirectories share 
   assert.notEqual(f.start("claude", { cwd: other }), scope);
   assert.notEqual(f.start("claude", { session_id: "session-B" }), scope);
   assert.notEqual(f.start("codex"), scope);
-  assert.notEqual(f.start("gemini"), scope);
-  assert.notEqual(f.start("copilot"), scope);
+  assert.notEqual(f.start("cursor"), scope);
   assert.equal(f.cli("show", scope, undefined, { cwd: other }).status, 1);
   assert.deepEqual(f.good(f.hook("claude", { cwd: other }, true)), {});
   const outside = join(f.temp, "plain");
@@ -375,35 +373,6 @@ for (const shell of ["powershell.exe", "pwsh.exe"]) for (const mode of ["FullLan
   assert.equal(state.runs[0].title, "한글 요청 보존");
   assert.equal(state.runs[0].items[0].title, "검증 항목");
   assert.equal(state.runs[0].items[0].verification, "저장된 원문 확인");
-});
-
-test("Gemini and Copilot skip non-completion events and bound corrupt-state reentry", async (t) => {
-  const f = await fixture(t);
-  for (const host of ["gemini", "copilot"]) {
-    const scope = f.start(host);
-    const state = f.begin(scope);
-    for (const reason of ["abort", "error", "user_exit"]) {
-      const event = host === "gemini" ? { hook_event_name: "SessionEnd", reason } : { stopReason: reason };
-      assert.deepEqual(f.good(f.hook(host, event, true)), {});
-    }
-    assert.deepEqual(f.good(f.cli("show", scope)), state);
-    assert.equal(f.cli("disable").status, 0);
-    assert.deepEqual(f.good(f.hook(host, {}, true)), {});
-    assert.deepEqual(JSON.parse(readFileSync(f.stateFile(scope), "utf8")), state);
-    assert.equal(f.cli("enable").status, 0);
-    writeFileSync(f.stateFile(scope), "{");
-    const first = f.good(f.hook(host, {}, true));
-    assert.equal(first.decision, host === "gemini" ? "deny" : "block");
-    assert.match(first.reason, /cannot verify completion/i);
-    const next = f.hook(host, { stop_hook_active: true }, true);
-    assert.equal(f.good(next).decision, undefined);
-    assert.match(next.stderr, /cannot verify completion/i);
-    assert.equal(readFileSync(f.stateFile(scope), "utf8"), "{");
-    const missing = f.good(f.hook(host, host === "copilot" ? { sessionId: null } : { session_id: null }));
-    const context = host === "copilot" ? missing.additionalContext : missing.hookSpecificOutput.additionalContext;
-    assert.match(context, /stable host session ID is required/);
-    assert.equal(context.includes("TASK scope:"), false);
-  }
 });
 
 test("OMP uses session_stop continuation contract and skips aborted and error stops", async (t) => {
