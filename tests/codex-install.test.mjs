@@ -27,7 +27,6 @@ test("Codex marketplace source ships working hooks and skill dependencies withou
     "tasks-setup",
     "workstyle",
     "workstyle-access",
-    "workstyle-comments",
     "workstyle-commits",
     "workstyle-computer-use",
     "workstyle-pnpm",

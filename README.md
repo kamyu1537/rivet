@@ -6,7 +6,7 @@
 
 ## 기능
 
-- 하네스 훅이 [workstyle](skills/workstyle/SKILL.md) 스킬 호출을 안내하고, 스킬이 [공통 작업 코어](prompts/workstyle.md)를 읽습니다. 주석, 커밋, pnpm, computer-use 같은 상황 규칙은 `workstyle-*` 스킬로 필요할 때만 읽습니다. 훅은 짧은 안내와 설치된 스킬의 절대 경로를 전달합니다.
+- 하네스 훅이 [workstyle](skills/workstyle/SKILL.md) 스킬 호출을 안내하고, 스킬이 [공통 작업 코어](prompts/workstyle.md)를 읽습니다. 항상 지킬 규칙(주석·메타 서술 포함)은 코어에 두고, 커밋·pnpm·computer-use처럼 특정 행동에만 해당하는 규칙은 `workstyle-*` 스킬로 필요할 때만 읽습니다. 훅은 짧은 안내와 설치된 스킬의 절대 경로를 전달합니다.
 - TASK를 켜면 작업 계획, 진행 상태와 검증 근거를 기록합니다. 등록된 미완료 항목이 있으면 계획당 최대 2회 계속 실행을 요청합니다.
 
 `rivet-setup`은 설치와 초기 설정을, `tasks-setup`은 TASK 켜기와 끄기를 담당합니다. 스킬 호출 도구가 없으면 해당 스킬 파일을 직접 읽고 따릅니다.

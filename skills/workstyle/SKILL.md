@@ -9,10 +9,9 @@ description: 세션 시작 훅이 지정한 필수 스킬이다. 요청 종류�
 
 [공통 작업 규칙](../../prompts/workstyle.md)을 끝까지 읽고 따른다. 현재 하네스와 프로젝트의 지시 우선순위를 따른다.
 
-세션 시작에는 이 코어만 읽는다. 아래 상황 스킬은 해당 행동을 하기 직전에 description으로 골라 호출한다. 네임스페이스가 있으면 `rivet:` 접두를 붙인다. 해당하지 않으면 호출하지 않는다.
+항상 지켜야 하는 규칙은 코어에 둔다. 특정 행동을 할 때만 해당하는 규칙은 아래 상황 스킬로 두고, 그 행동을 하기 직전에 description으로 골라 호출한다. 네임스페이스가 있으면 `rivet:` 접두를 붙인다. 해당하지 않으면 호출하지 않는다.
 
 - `workstyle-root-cause`: 버그·이상 동작을 조사하거나 수정할 때
-- `workstyle-comments`: 주석, 문서, 규칙 파일, 생성 산출물을 쓰거나 고칠 때
 - `workstyle-test-surface`: 테스트를 위해 프로덕션 API·접근성을 바꾸려 할 때
 - `workstyle-computer-use`: computer-use나 GUI 자동화를 쓰려 할 때
 - `workstyle-pnpm`: Node 패키지 설치·잠금·스크립트·CI 패키지 단계를 다룰 때
