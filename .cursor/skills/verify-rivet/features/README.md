@@ -28,4 +28,4 @@ Maintained source for verifying rivet’s user-facing CLI and hook behavior afte
 - [Project TASK activation](./project-task-activation.md) covers enable, disable, status, bare enable failure, and ignored home flag.
 - [Session-start context](./session-start-context.md) covers workstyle path and TASK enabled lines for claude, codex, cursor, and omp.
 - [TASK run lifecycle](./task-run-lifecycle.md) covers begin/set/show/check and Stop continuation budget.
-- [Validate contract](./validate-contract.md) covers the validator’s retired-surface scan and situational workstyle skill asserts.
+- [Validate contract](./validate-contract.md) covers the validator’s retired-surface scan and split workstyle skill check.

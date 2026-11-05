@@ -85,12 +85,11 @@ function checkForbidden(directory) {
 }
 checkForbidden(root);
 
-const situationalOnly = ["workstyle-root-cause"];
 const skillNames = readdirSync(join(root, "skills"), { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
 assert.deepEqual(
   skillNames.filter((name) => name.startsWith("workstyle-")),
-  situationalOnly,
-  "workstyle-* skills must stay situational-only; always-on rules belong in prompts/workstyle.md",
+  [],
+  "workstyle rules belong in prompts/workstyle.md, not in workstyle-* skills",
 );
 
 process.stdout.write("Manifests, skill metadata, extension paths, local links, and forbidden surfaces are valid.\n");

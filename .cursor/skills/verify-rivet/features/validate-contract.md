@@ -1,11 +1,11 @@
 # Validate contract
 
-`pnpm run validate` fails the tree when removed harness or skill surfaces return, and asserts situational-only `workstyle-*` skills.
+`pnpm run validate` fails the tree when removed harness or skill surfaces return, and rejects split `workstyle-*` skills.
 
 ## Sub-features
 
 - `forbidden-surfaces` rejects the retired host and skill id strings listed in `scripts/validate.mjs` (outside that file itself).
-- `situational-skills` requires exactly the four `workstyle-*` skill directories.
+- `no-split-workstyle` rejects any `workstyle-*` skill directory.
 
 ## How to get to it (user POV)
 
@@ -25,4 +25,4 @@ Preconditions:
 ## Gotchas
 
 - `scripts/validate.mjs` is skipped by the forbidden scan so its own patterns do not self-fail.
-- Always-on comment/commit/computer-use rules must stay in `prompts/workstyle.md`, not as new `workstyle-*` skills.
+- All workstyle rules stay in `prompts/workstyle.md`, not as `workstyle-*` skills.
