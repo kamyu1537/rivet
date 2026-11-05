@@ -1,6 +1,6 @@
 {
   "name": "rivet",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "개인 작업 규칙과 선택적 TASK 추적",
   "author": { "name": "kamyu1537" },
   "repository": "https://github.com/kamyu1537/rivet",
