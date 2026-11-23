@@ -28,6 +28,7 @@ async function fixture(t) {
   };
   const hook = (host, event = {}, stop = false) => run(stop ? "hooks/stop.mjs" : "hooks/session-start.mjs", [host], {
     ...(host === "cursor" ? { conversation_id: "session-A", workspace_roots: [cwd] }
+      : host === "antigravity" ? { conversationId: "session-A", workspacePaths: [cwd] }
       : { session_id: "session-A", cwd, hook_event_name: stop ? "Stop" : "SessionStart" }),
     ...event,
   });
@@ -35,7 +36,9 @@ async function fixture(t) {
     const result = hook(host, event);
     assert.equal(result.status, 0, result.stderr);
     const output = JSON.parse(result.stdout);
-    const context = host === "cursor" ? output.additional_context : output.hookSpecificOutput.additionalContext;
+    const context = host === "cursor" ? output.additional_context
+      : host === "antigravity" ? output.injectSteps[0].systemMessage.systemMessage
+      : output.hookSpecificOutput.additionalContext;
     const scope = context.match(/TASK scope: ([a-f0-9]{64})/)?.[1];
     assert.equal(typeof scope, "string", context);
     return scope;
@@ -111,14 +114,14 @@ test("waiting and cancelled items remain incomplete and old runs can be resumed 
 
 test("Stop retries only the current scope and preserves its finite budget across edits and restart", async (t) => {
   const f = await fixture(t);
-  for (const host of ["claude", "codex", "cursor"]) {
+  for (const host of ["claude", "codex", "cursor", "antigravity"]) {
     const scope = f.start(host);
     let state = f.begin(scope);
     const event = host === "cursor" ? { status: "completed", loop_count: 0 } : { stop_hook_active: false };
     const first = f.good(f.hook(host, event, true));
-    if (host !== "cursor") assert.equal(first.decision, "block");
+    if (host !== "cursor") assert.equal(first.decision, host === "antigravity" ? "continue" : "block");
     assert.match(host === "cursor" ? first.followup_message : first.reason, /build: Implement change/);
-    assert.deepEqual(f.good(f.hook(host, { ...event, session_id: "other-session", sessionId: "other-session", conversation_id: "other-session" }, true)), {});
+    assert.deepEqual(f.good(f.hook(host, { ...event, session_id: "other-session", sessionId: "other-session", conversation_id: "other-session", conversationId: "other-session" }, true)), {});
     state = f.good(f.cli("show", scope));
     state = f.set(scope, state, "build", "active");
     assert.equal(f.start(host), scope);
@@ -176,6 +179,18 @@ test("deleted, malformed and mismatched registered state cannot be verified and 
     assert.match(f.good(f.hook("claude")).hookSpecificOutput.additionalContext, /cannot verify or register/);
     if (damage === "deleted") assert.equal(existsSync(f.stateFile(scope)), false);
   }
+});
+
+test("Antigravity Stop skips errored turns and never retries an unverifiable state", async (t) => {
+  const f = await fixture(t);
+  const scope = f.start("antigravity");
+  f.begin(scope);
+  assert.deepEqual(f.good(f.hook("antigravity", { error: "model failed" }, true)), {});
+  assert.equal(f.good(f.cli("show", scope)).runs[0].continuationCount, 0);
+  writeFileSync(f.stateFile(scope), "{");
+  const unverifiable = f.hook("antigravity", {}, true);
+  assert.deepEqual(f.good(unverifiable), {});
+  assert.match(unverifiable.stderr, /cannot verify completion/i);
 });
 
 test("scope locks are bounded and concurrent updates reject stale revisions", async (t) => {

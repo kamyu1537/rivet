@@ -26,10 +26,14 @@ test("installed hooks route to the workstyle skill within the startup budget and
   const env = { ...process.env, HOME: home, USERPROFILE: home };
   const run = (file, args = [], input) => spawnSync(process.execPath, [join(plugin, file), ...args], { cwd: workspace, env, encoding: "utf8", input: JSON.stringify(input) });
   const context = (host) => {
-    const result = run("hooks/session-start.mjs", [host], host === "cursor" ? { conversation_id: "flag-session", workspace_roots: [workspace] } : { session_id: "flag-session", cwd: workspace });
+    const input = host === "cursor" ? { conversation_id: "flag-session", workspace_roots: [workspace] }
+      : host === "antigravity" ? { conversationId: "flag-session", workspacePaths: [workspace] }
+      : { session_id: "flag-session", cwd: workspace };
+    const result = run("hooks/session-start.mjs", [host], input);
     assert.equal(result.status, 0, result.stderr);
     const payload = JSON.parse(result.stdout);
     if (host === "cursor") return payload.additional_context;
+    if (host === "antigravity") return payload.injectSteps[0].systemMessage.systemMessage;
     assert.equal(payload.hookSpecificOutput.hookEventName, "SessionStart");
     return payload.hookSpecificOutput.additionalContext;
   };
@@ -48,7 +52,7 @@ test("installed hooks route to the workstyle skill within the startup budget and
     for (const path of references) assert.ok(readFileSync(path, "utf8").trim());
   };
   const disabled = context("claude");
-  for (const host of ["claude", "codex", "cursor"]) {
+  for (const host of ["claude", "codex", "cursor", "antigravity"]) {
     const actual = context(host);
     assert.equal(actual, disabled);
     assertRules(actual, false);
@@ -72,7 +76,7 @@ test("installed hooks route to the workstyle skill within the startup budget and
   }
   assert.equal(existsSync(join(workspace, "CLAUDE.md")), false);
   assert.equal(readFileSync(flag, "utf8"), "preserve user content");
-  for (const host of ["claude", "codex", "cursor"]) {
+  for (const host of ["claude", "codex", "cursor", "antigravity"]) {
     const actual = context(host);
     assertRules(actual, true);
     assert.match(actual, /TASK scope: [a-f0-9]{64}/);

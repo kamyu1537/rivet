@@ -5,7 +5,7 @@ import { homedir } from "node:os";
 import { isAbsolute, join, relative, sep } from "node:path";
 
 const directory = join(homedir(), ".config", "rivet", "tasks");
-const hosts = ["claude", "codex", "cursor", "omp"];
+const hosts = ["claude", "codex", "cursor", "omp", "antigravity"];
 const statuses = ["pending", "active", "done", "waiting", "cancelled"];
 const openStatuses = ["pending", "active"];
 const historyActions = ["begin", "add", "set", "resume", "continue"];

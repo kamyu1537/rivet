@@ -47,6 +47,7 @@ Rivet TASK tracking is enabled for this project.
 - Claude Code와 Codex는 Stop의 `decision: "block"`과 `reason`으로 계속 실행을 요청한다. 오류·한도 소진은 systemMessage와 stderr로 알린다. Claude 사용자 중단은 Stop을 실행하지 않는다. [Claude Stop](https://code.claude.com/docs/en/hooks#stop), [Codex hooks](https://learn.chatgpt.com/docs/hooks)
 - Cursor는 `conversation_id`와 `workspace_roots`의 첫 경로를 사용한다. 여러 루트를 합치지 않는다. `status`가 completed일 때만 followup_message로 계속 실행하고 `loop_limit`은 2이다. aborted·error는 건너뛴다. 경고는 stderr에만 남는다. [Cursor hooks](https://cursor.com/docs/hooks)
 - Cursor Agent CLI(`2026.10.01-e373342` 기준)는 `--print`에서 Stop 훅을 실행하지 않는다. 대화형 실행도 사용자·프로젝트 Stop 훅 없이 플러그인 Stop 훅만 있으면 실행하지 않는다. 이런 환경에서는 완료 전 `show`와 `check`를 직접 실행한다.
+- Antigravity는 `conversationId`와 `workspacePaths`의 첫 경로를 사용한다. 훅은 플러그인 루트에서 실행되므로 작업 디렉터리를 쓰지 않는다. Stop의 `decision: "continue"`와 `reason`으로 계속 실행을 요청한다. `error`가 있는 종료는 건너뛴다. 재진입 표시가 없어 상태 오류는 계속 실행을 요청하지 않고 stderr에만 남긴다. [Antigravity hooks](https://antigravity.google/docs/hooks/)
 - OMP는 session_stop의 continue와 additionalContext로 계속 실행을 요청한다. signal 중단과 assistant의 error·aborted는 건너뛴다. 경고는 가능하면 ctx.ui.notify로 표시한다. 계약은 OMP 18.10.3 소스 기준이다. session_stop이 없는 버전은 종료 검사를 지원하지 않는다. [이벤트 계약](https://github.com/can1357/oh-my-pi/blob/7414b7c919b59dd14db354a8f6b9164426237dff/packages/coding-agent/src/extensibility/shared-events.ts#L109)
 
 ## 확인

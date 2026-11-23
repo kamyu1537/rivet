@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => JSON.parse(readFileSync(join(root, file), "utf8"));
 const pkg = readJson("package.json");
 assert.equal(existsSync(join(root, "plugin.json")), false, "A root plugin.json overrides the Codex manifest and disables its hooks");
-for (const file of [".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json"]) {
+for (const file of [".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json", ".antigravity-plugin/plugin.json"]) {
   const manifest = readJson(file);
   assert.equal(manifest.name, pkg.name);
   assert.equal(manifest.version, pkg.version);
@@ -28,6 +28,12 @@ for (const file of [".claude-plugin/marketplace.json", ".cursor-plugin/marketpla
   assert.equal(typeof source === "string" ? source : source.path, "./");
 }
 for (const extension of pkg.omp.extensions) assert.ok(existsSync(join(root, extension)));
+for (const handlers of Object.values(readJson("hooks.json").rivet)) {
+  for (const { command } of handlers) {
+    const script = command.match(/^node \.\/(\S+) antigravity$/)?.[1];
+    assert.ok(script && existsSync(join(root, script)), `hooks.json: invalid Antigravity command ${command}`);
+  }
+}
 
 function checkFiles(directory) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {

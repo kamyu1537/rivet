@@ -1,0 +1,10 @@
+{
+  "rivet": {
+    "SessionStart": [
+      { "type": "command", "command": "node ./hooks/session-start.mjs antigravity", "timeout": 10 }
+    ],
+    "Stop": [
+      { "type": "command", "command": "node ./hooks/stop.mjs antigravity", "timeout": 10 }
+    ]
+  }
+}
